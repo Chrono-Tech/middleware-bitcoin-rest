@@ -27,10 +27,10 @@ module.exports = async (req, res) => {
   for (let i = 0; i < tx.inputs.length; i++) {
     let input = _.find(utxos, {txid: tx.inputs[i].prevout.hash});
     tx.inputs[i] = {
-      address: input.address,
-      txid: input.txid,
-      script: input.scriptPubKey,
-      value: input.satoshis
+      address: _.get(input, 'address'),
+      txid: _.get(input, 'txid'),
+      script: _.get(input, 'scriptPubKey'),
+      value: _.get(input, 'satoshis')
     };
   }
 
