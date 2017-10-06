@@ -34,7 +34,7 @@ module.exports = async tx => {
   let result = await new Promise((res, rej) => {
     ipcInstance.of[config.bitcoin.ipcName].on('message', data => data.error ? rej(data.error) : res(data.result));
     ipcInstance.of[config.bitcoin.ipcName].emit('message', JSON.stringify({
-      method: 'sendrawtransaction',
+      method: 'sendrawtransactionnotify',
       params: [tx]
     })
     );
