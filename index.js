@@ -2,6 +2,7 @@ const config = require('./config'),
   express = require('express'),
   routes = require('./routes'),
   cors = require('cors'),
+  customNetworkRegistrator = require('./networks'),
   mongoose = require('mongoose'),
   bodyParser = require('body-parser');
 
@@ -13,6 +14,8 @@ const config = require('./config'),
 
 mongoose.Promise = Promise;
 mongoose.connect(config.mongo.uri, {useMongoClient: true});
+
+customNetworkRegistrator(config.bitcoin.network);
 
 let app = express();
 
