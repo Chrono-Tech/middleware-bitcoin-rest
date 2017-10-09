@@ -48,17 +48,17 @@ module.exports = async (req, res) => {
 
   for (let address of addresses) {
     let utxos = await fetchUTXOService(address);
-    let balances = calcBalanceService(utxos);
+    let balance = calcBalanceService(utxos);
 
     let delta = _.chain(tx.outputs).filter({address: address}).map(i => i.value).sum().defaultTo(0).value() -
       _.chain(tx.inputs).filter({address: address}).map(i => i.value).sum().defaultTo(0).value();
 
-    _.set(balances, 'balances.confirmations0', delta + _.get(balances, 'balances.confirmations6', 0));
+    balance.balance += delta;
 
     await accountModel.update({address: address}, {
       $set: {
-        'balances.confirmations0': _.get(balances, 'balances.confirmations0'),
-        lastBlockCheck: balances.lastBlockCheck
+        'balances.confirmations0': balance.balance,
+        lastBlockCheck: balance.lastBlockCheck
       }
     });
 
