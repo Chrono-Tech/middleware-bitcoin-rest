@@ -18,11 +18,11 @@ module.exports = async (req, res) => {
 
   try {
     let utxos = await fetchUTXOService(req.body.address);
-    let balances = calcBalanceService(utxos);
-    account.balances.confirmations0 = _.get(balances, 'balances.confirmations0', 0);
-    account.balances.confirmations3 = _.get(balances, 'balances.confirmations3', 0);
-    account.balances.confirmations6 = _.get(balances, 'balances.confirmations6', 0);
-    account.lastBlockCheck = balances.lastBlockCheck;
+    let balance = calcBalanceService(utxos);
+    account.balances.confirmations0 = balance.balance;
+    account.balances.confirmations3 = balance.balance;
+    account.balances.confirmations6 = balance.balance;
+    account.lastBlockCheck = balance.lastBlockCheck;
     await account.save();
 
     res.send(messages.success);
