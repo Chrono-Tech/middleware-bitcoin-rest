@@ -5,7 +5,8 @@ const accountModel = require('../../models/accountModel'),
   decodeTxService = require('../../utils/decodeTxService'),
   calcBalanceService = require('../../utils/calcBalanceService'),
   pushTxService = require('../../utils/pushTxService'),
-  fetchUTXOService = require('../../utils/fetchUTXOService');
+  fetchUTXOService = require('../../utils/fetchUTXOService'),
+  fetchTXService = require('../../utils/fetchTXService');
 
 module.exports = async (req, res) => {
 
@@ -13,24 +14,45 @@ module.exports = async (req, res) => {
     return res.send(messages.fail);
   }
 
-  let tx = decodeTxService(req.body.tx);
+  let tx = await decodeTxService(req.body.tx);
 
-  let addresses = _.chain([])
-    .union(tx.outputs, tx.inputs)
-    .map(item => item.address)
+  let voutAddresses = _.chain(tx.vout)
+    .map(vout => _.get(vout, 'scriptPubKey.addresses', []))
+    .flattenDeep()
     .uniq()
     .value();
 
-  let utxos = await Promise.mapSeries(addresses, address => fetchUTXOService(address));
-  utxos = _.flattenDeep(utxos);
+  let inputs = await Promise.mapSeries(tx.vin, async vin => {
+    let tx = await fetchTXService(vin.txid);
+    return tx.vout[vin.vout];
+  });
+
+  let vinAddresses = _.chain(inputs)
+    .map(vout => _.get(vout, 'scriptPubKey.addresses', []))
+    .flattenDeep()
+    .uniq()
+    .value();
+
+  let addresses = _.chain(voutAddresses)
+    .union(vinAddresses)
+    .flattenDeep()
+    .uniq()
+    .value();
+
+  tx.inputs = inputs;
+  tx.outputs = tx.vout.map(v => ({
+    value: Math.floor(v.value * Math.pow(10, 8)),
+    scriptPubKey: v.scriptPubKey,
+    addresses: v.scriptPubKey.addresses
+  }));
 
   for (let i = 0; i < tx.inputs.length; i++) {
-    let input = _.find(utxos, {txid: tx.inputs[i].prevout.hash});
     tx.inputs[i] = {
-      address: _.get(input, 'address'),
-      txid: _.get(input, 'txid'),
-      script: _.get(input, 'scriptPubKey'),
-      value: _.get(input, 'satoshis')
+      addresses: tx.inputs[i].scriptPubKey.addresses,
+      prev_hash: tx.vin[i].txid,
+      script: tx.inputs[i].scriptPubKey,
+      value: Math.floor(tx.inputs[i].value * Math.pow(10, 8)),
+      output_index: tx.vin[i].vout
     };
   }
 
@@ -46,19 +68,21 @@ module.exports = async (req, res) => {
 
   tx.fee = tx.valueIn - tx.valueOut;
 
+  tx = _.omit(tx, ['vin', 'vout', 'blockhash']);
+
   for (let address of addresses) {
     let utxos = await fetchUTXOService(address);
-    let balance = calcBalanceService(utxos);
+    let balances = calcBalanceService(utxos);
 
-    let delta = _.chain(tx.outputs).filter({address: address}).map(i => i.value).sum().defaultTo(0).value() -
-      _.chain(tx.inputs).filter({address: address}).map(i => i.value).sum().defaultTo(0).value();
+    let delta = _.chain(tx.outputs).filter(out => out.addresses.includes(address)).map(i => i.value).sum().defaultTo(0).value() -
+      _.chain(tx.inputs).filter(input => input.addresses.includes(address)).map(i => i.value).sum().defaultTo(0).value();
 
-    balance.balance += delta;
+    _.set(balances, 'balances.confirmations0', delta + _.get(balances, 'balances.confirmations6', 0));
 
     await accountModel.update({address: address}, {
       $set: {
-        'balances.confirmations0': balance.balance,
-        lastBlockCheck: balance.lastBlockCheck
+        'balances.confirmations0': _.get(balances, 'balances.confirmations0'),
+        lastBlockCheck: balances.lastBlockCheck
       }
     });
 
