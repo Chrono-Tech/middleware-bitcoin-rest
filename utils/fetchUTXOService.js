@@ -1,7 +1,5 @@
 const Promise = require('bluebird'),
   ipc = require('node-ipc'),
-  Coin = require('bcoin/lib/primitives/coin'),
-  Network = require('bcoin/lib/protocol/network'),
   config = require('../config'),
   _ = require('lodash');
 
@@ -32,8 +30,6 @@ module.exports = async address => {
     unlink: false,
     maxRetries: 3
   });
-
-  let network = Network.get(config.bitcoin.network);
 
   await new Promise((res, rej) => {
     ipcInstance.connectTo(config.bitcoin.ipcName, () => {
@@ -67,16 +63,17 @@ module.exports = async address => {
   return _.chain(rawCoins)
     .filter(c => c.height > -1)
     .map(rawCoin => {
-      let coin = Coin.fromJSON(rawCoin).getJSON(network);
       return ({
-        address: coin.address,
-        txid: coin.hash,
-        scriptPubKey: coin.script,
-        amount: coin.value / 100000000,
-        satoshis: coin.value,
-        height: coin.height,
-        confirmations: height - coin.height
+        address: rawCoin.address,
+        txid: rawCoin.hash,
+        scriptPubKey: rawCoin.script,
+        amount: rawCoin.value / 100000000,
+        satoshis: rawCoin.value,
+        height: rawCoin.height,
+        vout: rawCoin.index,
+        confirmations: height - rawCoin.height
       });
     })
+    .orderBy('height', 'desc')
     .value();
 };
