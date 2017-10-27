@@ -1,5 +1,6 @@
 const accountModel = require('../../models/accountModel'),
-  messages = require('../../factories/messages/genericMessageFactory'),
+  genericMessages = require('../../factories/messages/genericMessageFactory'),
+  addressMessages = require('../../factories/messages/addressMessageFactory'),
   _ = require('lodash'),
   calcBalanceService = require('../../utils/calcBalanceService'),
   fetchUTXOService = require('../../utils/fetchUTXOService');
@@ -7,13 +8,17 @@ const accountModel = require('../../models/accountModel'),
 module.exports = async (req, res) => {
 
   if (!req.body.address) {
-    return res.send(messages.fail);
+    return res.send(genericMessages.notEnoughArgs);
   }
 
   let account = new accountModel(req.body);
 
-  if (account.validateSync()) {
-    return res.send(messages.fail);
+  let errors = account.validateSync();
+
+  if (errors) {
+    return _.has(errors, 'errors.address.properties') ?
+      res.send(_.pick(errors.errors.address.properties, ['message', 'code'])) :
+      res.send(genericMessages.fail);
   }
 
   try {
@@ -25,8 +30,10 @@ module.exports = async (req, res) => {
     account.lastBlockCheck = balances.lastBlockCheck;
     await account.save();
 
-    res.send(messages.success);
+    res.send(genericMessages.success);
   } catch (e) {
-    res.send(messages.fail);
+    e.code === 11000 ?
+      res.send(addressMessages.existAddress) :
+      res.send(genericMessages.fail);
   }
 };
