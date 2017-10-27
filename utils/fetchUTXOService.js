@@ -67,11 +67,11 @@ module.exports = async address => {
         address: rawCoin.address,
         txid: rawCoin.hash,
         scriptPubKey: rawCoin.script,
-        amount: rawCoin.value / 100000000,
+        amount: rawCoin.value / Math.pow(10, 8),
         satoshis: rawCoin.value,
         height: rawCoin.height,
         vout: rawCoin.index,
-        confirmations: height - rawCoin.height
+        confirmations: height - rawCoin.height + 1
       });
     })
     .orderBy('height', 'desc')

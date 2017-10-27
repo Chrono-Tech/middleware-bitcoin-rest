@@ -1,16 +1,15 @@
-const ipc = require('node-ipc'),
+const Promise = require('bluebird'),
+  ipc = require('node-ipc'),
   config = require('../config');
 
 /**
  * @service
- * @description get balances for each account
- * @param txHex - raw transaction
- * @returns {Promise.<[{balance, account}]>}
+ * @description get mempool txs
+ * @returns {Promise.<{txhash: {}}>}
  */
 
-module.exports = async txHex => {
 
-
+module.exports = async () => {
 
   const ipcInstance = new ipc.IPC;
 
@@ -24,8 +23,6 @@ module.exports = async txHex => {
     maxRetries: 3
   });
 
-
-
   await new Promise((res, rej) => {
     ipcInstance.connectTo(config.bitcoin.ipcName, () => {
       ipcInstance.of[config.bitcoin.ipcName].on('connect', res);
@@ -33,19 +30,17 @@ module.exports = async txHex => {
     });
   });
 
-
-
-  let tx = await new Promise((res, rej) => {
+  let txs = await new Promise((res, rej) => {
     ipcInstance.of[config.bitcoin.ipcName].on('message', data => data.error ? rej(data.error) : res(data.result));
     ipcInstance.of[config.bitcoin.ipcName].emit('message', JSON.stringify({
-      method: 'decoderawtransaction',
-      params: [txHex]
+      method: 'getrawmempool',
+      params: [true]
     })
     );
   });
 
   ipcInstance.disconnect(config.bitcoin.ipcName);
 
-  return tx;
+  return txs;
 
 };

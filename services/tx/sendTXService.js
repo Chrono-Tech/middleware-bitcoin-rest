@@ -1,20 +1,23 @@
 const accountModel = require('../../models/accountModel'),
   _ = require('lodash'),
   Promise = require('bluebird'),
-  messages = require('../../factories/messages/genericMessageFactory'),
+  genericMessages = require('../../factories/messages/genericMessageFactory'),
+  txMessages = require('../../factories/messages/txMessageFactory'),
   decodeTxService = require('../../utils/decodeTxService'),
   calcBalanceService = require('../../utils/calcBalanceService'),
   pushTxService = require('../../utils/pushTxService'),
   fetchUTXOService = require('../../utils/fetchUTXOService'),
-  fetchTXService = require('../../utils/fetchTXService');
+  fetchTXService = require('../../utils/fetchTXService'),
+  fetchMemPoolService = require('../../utils/fetchMemPoolService');
 
 module.exports = async (req, res) => {
 
   if (!req.body.tx) {
-    return res.send(messages.fail);
+    return res.send(genericMessages.notEnoughArgs);
   }
 
-  let tx = await decodeTxService(req.body.tx);
+  let tx = await decodeTxService(req.body.tx)
+    .catch(() => Promise.reject(txMessages.wrongTx));
 
   let voutAddresses = _.chain(tx.vout)
     .map(vout => _.get(vout, 'scriptPubKey.addresses', []))
@@ -25,7 +28,7 @@ module.exports = async (req, res) => {
   let inputs = await Promise.mapSeries(tx.vin, async vin => {
     let tx = await fetchTXService(vin.txid);
     return tx.vout[vin.vout];
-  });
+  }).catch(() => Promise.reject(txMessages.wrongTx));
 
   let vinAddresses = _.chain(inputs)
     .map(vout => _.get(vout, 'scriptPubKey.addresses', []))
@@ -49,10 +52,10 @@ module.exports = async (req, res) => {
   for (let i = 0; i < tx.inputs.length; i++) {
     tx.inputs[i] = {
       addresses: tx.inputs[i].scriptPubKey.addresses,
-      prev_hash: tx.vin[i].txid,
+      prev_hash: tx.vin[i].txid, //eslint-disable-line
       script: tx.inputs[i].scriptPubKey,
       value: Math.floor(tx.inputs[i].value * Math.pow(10, 8)),
-      output_index: tx.vin[i].vout
+      output_index: tx.vin[i].vout //eslint-disable-line
     };
   }
 
@@ -88,7 +91,12 @@ module.exports = async (req, res) => {
 
   }
 
-  await pushTxService(req.body.tx);
+  let hash = await pushTxService(req.body.tx);
+  let memTxs = await fetchMemPoolService();
 
+  if (!memTxs[hash])
+  {return res.send(txMessages.wrongTx);}
+
+  tx.time = _.get(memTxs, `${hash}.time`, 0);
   res.send(tx);
 };
