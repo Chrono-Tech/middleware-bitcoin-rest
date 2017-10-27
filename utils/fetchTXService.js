@@ -1,20 +1,12 @@
 const Promise = require('bluebird'),
   ipc = require('node-ipc'),
-  Tx = require('bcoin/lib/primitives/tx'),
-  Network = require('bcoin/lib/protocol/network'),
   config = require('../config');
 
 /**
  * @service
  * @description get utxos for a specified address
- * @param address - registered address
- * @returns {Promise.<[{address: *,
- *     txid: *,
- *     scriptPubKey: *,
- *     amount: *,
- *     satoshis: *,
- *     height: *,
- *     confirmations: *}]>}
+ * @param hash - tx hash (or txid)
+ * @returns {Promise.<{txObject}>}
  */
 
 

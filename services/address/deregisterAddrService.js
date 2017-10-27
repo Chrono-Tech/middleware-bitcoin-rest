@@ -5,7 +5,7 @@ const accountModel = require('../../models/accountModel'),
 module.exports = async (req, res) => {
 
   if (!req.body.address) {
-    return res.send(messages.fail);
+    return res.send(messages.notEnoughArgs);
   }
 
   await accountModel.remove({address: req.body.address});

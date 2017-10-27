@@ -83,7 +83,7 @@ describe('core/rest', function () {
     }));
 
     responses.forEach(resp =>
-      expect(resp.body).to.include({success: true})
+      expect(resp.body).to.include({code: 1})
     )
   });
 
