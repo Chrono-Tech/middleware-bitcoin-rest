@@ -94,9 +94,6 @@ module.exports = async (req, res) => {
   let hash = await pushTxService(req.body.tx);
   let memTxs = await fetchMemPoolService();
 
-  if (!memTxs[hash])
-  {return res.send(txMessages.wrongTx);}
-
   tx.time = _.get(memTxs, `${hash}.time`, 0);
   res.send(tx);
 };
