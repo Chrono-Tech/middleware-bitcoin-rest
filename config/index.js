@@ -1,50 +1,35 @@
 require('dotenv').config();
-const _ = require('lodash');
 
 /**
  * @factory config
  * @description base app's configuration
  * @returns {{
  *    mongo: {
- *      uri: (*)
+ *      uri: string,
+ *      collectionPrefix: string
  *      },
  *    rest: {
- *      domain: (*),
- *      port: (*)
+ *      domain: string,
+ *      port: number
  *      },
- *    rabbit: {
- *      url: (*)
- *      },
- *    bitcoin: {
- *      host: (*),
- *      port: (*),
- *      user: (*),
- *      pass: (*)
+ *    node: {
+ *      ipcName: string,
+ *      ipcPath: string
  *      }
  *    }}
  */
 
 module.exports = {
   mongo: {
-    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/data'
+    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+    collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
   },
   rest: {
     domain: process.env.DOMAIN || 'localhost',
     port: parseInt(process.env.REST_PORT) || 8081
   },
-  rabbit: {
-    url: process.env.RABBIT_URI || 'amqp://localhost:5672',
-    serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
-  },
-  bitcoin: {
-    dbpath: process.env.BITCOIN_DB_PATH || '',
-    network: process.env.BITCOIN_NETWORK || 'regtest',
-    db: process.env.BITCOIN_DB || 'memory',
-    ipcName: process.env.BITCOIN_IPC || 'bitcoin',
-    ipcPath: process.env.BITCOIN_IPC_PATH || '/tmp/',
-    coinbase: _.chain(process.env.BITCOIN_ETHERBASE || '')
-      .split(',')
-      .map(i => i.trim())
-      .value()
+  node: {
+    ipcName: process.env.IPC_NAME || 'bitcoin',
+    ipcPath: process.env.IPC_PATH || '/tmp/'
   }
 };
