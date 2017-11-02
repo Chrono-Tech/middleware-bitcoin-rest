@@ -2,6 +2,8 @@ const config = require('./config'),
   express = require('express'),
   routes = require('./routes'),
   cors = require('cors'),
+  bunyan = require('bunyan'),
+  log = bunyan.createLogger({name: 'core.rest'}),
   mongoose = require('mongoose'),
   bodyParser = require('body-parser');
 
@@ -13,6 +15,11 @@ const config = require('./config'),
 
 mongoose.Promise = Promise;
 mongoose.connect(config.mongo.uri, {useMongoClient: true});
+
+mongoose.connection.on('disconnected', function () {
+  log.error('mongo disconnected!');
+  process.exit(0);
+});
 
 let app = express();
 
