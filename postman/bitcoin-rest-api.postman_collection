@@ -1,0 +1,93 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Chronobank-bitcoin-rest-api",
+		"_postman_id": "17a4dc2f-0826-0b4a-0f0a-d785a32235d7",
+		"description": "Bitcoin REST API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "/addr/<addr>/balance",
+			"request": {
+				"url": "http://{{server}}:{{port}}/addr/{{addr}}/balance",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Return address's balance for 0-3-6 confirmations"
+			},
+			"response": []
+		},
+		{
+			"name": "/addr/<addr>/utxo",
+			"request": {
+				"url": "http://{{server}}:{{port}}/addr/{{addr}}/utxo",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": "Returns an array of unspent transactions (utxo)"
+			},
+			"response": []
+		},
+		{
+			"name": "/addr",
+			"request": {
+				"url": "http://{{server}}:{{port}}/addr",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"address\": \"\"\n}"
+				},
+				"description": "Register a new account"
+			},
+			"response": []
+		},
+		{
+			"name": "/tx/send",
+			"request": {
+				"url": "http://{{server}}:{{port}}/tx/send",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"tx\": \"\"\n}"
+				},
+				"description": "Broadcast new transaction to network"
+			},
+			"response": []
+		},
+		{
+			"name": "/addr",
+			"request": {
+				"url": "http://{{server}}:{{port}}/addr",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"address\": \"\"\n}"
+				},
+				"description": "Remove specific account"
+			},
+			"response": []
+		}
+	]
+}
