@@ -35,16 +35,19 @@ module.exports = function (RED) {
         msg.payload = await new Promise((res, rej) => {
           ipcInstance.of[config.node.ipcName].on('message', data => data.error ? rej(data.error) : res(data.result));
           ipcInstance.of[config.node.ipcName].emit('message', JSON.stringify({
-              method: method,
-              params: params
-            })
+            method: method,
+            params: params
+          })
           );
         }).timeout(30000);
 
+        ipcInstance.disconnect(config.node.ipcName);
         node.send(msg);
       } catch (err) {
+        ipcInstance.disconnect(config.node.ipcName);
         this.error(JSON.stringify(err), msg);
       }
+
     });
   }
 

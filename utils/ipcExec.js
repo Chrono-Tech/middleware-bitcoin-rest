@@ -1,15 +1,7 @@
 const Promise = require('bluebird'),
-  ipc = require('node-ipc'),
-  config = require('../config');
+  ipc = require('node-ipc');
 
-/**
- * @service
- * @description get balances for an address
- * @param tx - raw transaction
- * @returns {Promise.<[{balances, lastBlockCheck}]>}
- */
-
-module.exports = async tx => {
+module.exports = async (config, method, params) => {
 
   const ipcInstance = new ipc.IPC;
 
@@ -23,26 +15,19 @@ module.exports = async tx => {
     maxRetries: 3
   });
 
-
-  await new Promise((res, rej) => {
+  await new Promise(res => {
     ipcInstance.connectTo(config.node.ipcName, () => {
       ipcInstance.of[config.node.ipcName].on('connect', res);
-      ipcInstance.of[config.node.ipcName].on('error', rej);
     });
   });
 
-  let result = await new Promise((res, rej) => {
+  let response = await new Promise((res, rej) => {
     ipcInstance.of[config.node.ipcName].on('message', data => data.error ? rej(data.error) : res(data.result));
-    ipcInstance.of[config.node.ipcName].emit('message', JSON.stringify({
-      method: 'sendrawtransactionnotify',
-      params: [tx]
-    })
+    ipcInstance.of[config.node.ipcName].emit('message', JSON.stringify({method: method, params: params})
     );
   });
 
-
   ipcInstance.disconnect(config.node.ipcName);
 
-  return result;
-
+  return response;
 };

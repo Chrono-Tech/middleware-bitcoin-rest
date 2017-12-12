@@ -26,7 +26,8 @@
     "chai": "^4.1.1",
     "mocha": "^3.5.0",
     "request": "^2.81.0",
-    "middleware-bitcoin-blockprocessor": "github:chronobank/middleware-bitcoin-blockprocessor"
+    "middleware-bitcoin-blockprocessor": "github:chronobank/middleware-bitcoin-blockprocessor",
+    "middleware-bitcoin-balance-processor": "github:chronobank/middleware-bitcoin-blockprocessor"
   },
   "scripts": {
     "lint": "node ./node_modules/eslint/bin/eslint.js -c .eslintrc.js --ext .js --fix --ignore-path .eslintignore .",

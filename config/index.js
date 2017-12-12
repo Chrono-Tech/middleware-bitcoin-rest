@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path'),
   bunyan = require('bunyan'),
   util = require('util'),
+  ipcExec = require('../utils/ipcExec'),
   log = bunyan.createLogger({name: 'core.rest'});
 
 /**
@@ -23,7 +24,7 @@ const path = require('path'),
  *    }}
  */
 
-module.exports = {
+let config = {
   mongo: {
     uri: process.env.MONGO_URI || 'mongodb://localhost:27017/data',
     collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
@@ -70,3 +71,9 @@ module.exports = {
     }
   }
 };
+
+module.exports = (() => {
+
+  config.nodered.functionGlobalContext.rpc = (...args)=> ipcExec.bind(this, config)(...args);
+  return config;
+})();

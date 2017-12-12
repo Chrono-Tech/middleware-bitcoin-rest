@@ -27,9 +27,7 @@ module.exports.up = function (done) {
         'y' : 180,
         'wires' : [
           [
-            'f13a8f73.5b9e1',
-            '808b0edf.80f64',
-            'b53dd569.a5f088'
+            '11fd83b0.8531dc'
           ]
         ]
       },
@@ -39,58 +37,9 @@ module.exports.up = function (done) {
         'z' : '2c9dd332.05334c',
         'name' : '',
         'statusCode' : '',
-        'x' : 1493,
+        'x' : 830,
         'y' : 180,
         'wires' : []
-      },
-      {
-        'id' : '27b27b8e.9827a4',
-        'type' : 'mongo',
-        'z' : '2c9dd332.05334c',
-        'model' : 'EthAccount',
-        'request' : '{}',
-        'name' : 'mongo create addr',
-        'mode' : '1',
-        'requestType' : '1',
-        'x' : 1050,
-        'y' : 180,
-        'wires' : [
-          [
-            '8ab75856.970bb8'
-          ]
-        ]
-      },
-      {
-        'id' : '8ab75856.970bb8',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : 'transform output',
-        'func' : '\nlet factories = global.get("factories"); \n\nif(msg.payload.error){\n    msg.payload = msg.payload.error.code === 11000 ? \n    factories.messages.address.existAddress :\n    factories.messages.generic.fail;\n    return msg;\n}\n    \n    \nmsg.payload = factories.messages.generic.success;\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 1257,
-        'y' : 181,
-        'wires' : [
-          [
-            'e4822e75.693fd'
-          ]
-        ]
-      },
-      {
-        'id' : '6d052eef.a0912',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : 'transform params',
-        'func' : '\nconst _ = global.get(\'_\');\n\nlet address = msg.payload[0].address;\nlet height = msg.payload[1];\nlet txs = msg.payload[2];\n\n\nlet countPositive = (txs, address) => {\n  return _.chain(txs)\n    .map(tx => tx.outputs)\n    .flattenDeep()\n    .filter(output => output.address === address)\n    .map(output => output.value)\n    .sum()\n    .value();\n};\n\nlet countNegative = (txs, address) => {\n  return _.chain(txs)\n    .map(tx => tx.inputs)\n    .flattenDeep()\n    .filter(input => _.get(input, \'coin.address\') === address)\n    .map(input => input.coin.value)\n    .sum()\n    .value();\n};\n    \n  let balances = {\n    confirmations0: _.chain()\n      .thru(() => {\n        return countPositive(txs, address) - countNegative(txs, address);\n      })\n      .defaultTo(0)\n      .value(),\n    confirmations3: _.chain()\n      .thru(() => {\n        let filteredTxs = _.filter(txs, tx => tx.height > 0 && (height - (tx.height - 1)) > 2);\n        return countPositive(filteredTxs, address) - countNegative(filteredTxs, address);\n      })\n      .defaultTo(0)\n      .value(),\n    confirmations6: _.chain()\n      .thru(() => {\n        let filteredTxs = _.filter(txs, tx => tx.height > 0 && (height - (tx.height - 1)) > 5);\n        return countPositive(filteredTxs, address) - countNegative(filteredTxs, address);\n      })\n      .defaultTo(0)\n      .value()\n  };    \n\n\nmsg.payload = {\n    model: \'BitcoinAccount\', \n    request: {\n       address: address,\n       balances: balances\n   }\n};\n\n\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 793,
-        'y' : 180,
-        'wires' : [
-          [
-            '27b27b8e.9827a4'
-          ]
-        ]
       },
       {
         'id' : '65927d71.4e8c44',
@@ -115,7 +64,7 @@ module.exports.up = function (done) {
         'z' : '2c9dd332.05334c',
         'name' : '',
         'statusCode' : '',
-        'x' : 1050,
+        'x' : 990,
         'y' : 340,
         'wires' : []
       },
@@ -128,7 +77,7 @@ module.exports.up = function (done) {
         'name' : 'mongo',
         'mode' : '1',
         'requestType' : '3',
-        'x' : 610,
+        'x' : 550,
         'y' : 340,
         'wires' : [
           [
@@ -144,7 +93,7 @@ module.exports.up = function (done) {
         'func' : '\nlet factories = global.get("factories"); \n\nif(msg.payload.error){\n    msg.payload = factories.messages.generic.fail;\n    return msg;\n}\n    \n    \nmsg.payload = factories.messages.generic.success;\nreturn msg;',
         'outputs' : 1,
         'noerr' : 0,
-        'x' : 820,
+        'x' : 760,
         'y' : 340,
         'wires' : [
           [
@@ -254,7 +203,8 @@ module.exports.up = function (done) {
         'y' : 1060,
         'wires' : [
           [
-            'd47923c.db3aae'
+            'd47923c.db3aae',
+            'dee6708f.9e557'
           ]
         ]
       },
@@ -273,15 +223,14 @@ module.exports.up = function (done) {
         'type' : 'function',
         'z' : '2c9dd332.05334c',
         'name' : 'transform',
-        'func' : '\nlet factories = global.get("factories"); \nlet error = msg.error.message;\ntry {\n    error = JSON.parse(error);\n}catch(e){}\n\nmsg.payload = error && error.code === 11000 ? \nfactories.messages.address.existAddress :\nfactories.messages.generic.fail;\n   \nreturn msg;',
+        'func' : '\nlet factories = global.get("factories"); \nlet error = msg.error.message;\ntry {\n    error = JSON.parse(error);\n}catch(e){}\n\nmsg.payload = error && error.code === 11000 ? \nfactories.messages.address.existAddress :\n\nmsg.error.message && msg.error.code ?\nmsg.error :\nfactories.messages.generic.fail;\n   \nreturn msg;',
         'outputs' : 1,
         'noerr' : 0,
         'x' : 441,
         'y' : 1060,
         'wires' : [
           [
-            '2e2f80ee.29994',
-            'dee6708f.9e557'
+            '2e2f80ee.29994'
           ]
         ]
       },
@@ -292,96 +241,10 @@ module.exports.up = function (done) {
         'name' : '',
         'active' : true,
         'console' : 'false',
-        'complete' : 'false',
-        'x' : 547,
+        'complete' : 'error',
+        'x' : 537,
         'y' : 958,
         'wires' : []
-      },
-      {
-        'id' : '1a276478.09024c',
-        'type' : 'bcoin',
-        'z' : '2c9dd332.05334c',
-        'mode' : '1',
-        'method' : '',
-        'name' : 'bcoin',
-        'x' : 430,
-        'y' : 260,
-        'wires' : [
-          [
-            '808b0edf.80f64'
-          ]
-        ]
-      },
-      {
-        'id' : 'f13a8f73.5b9e1',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : '',
-        'func' : '\nconst _ = global.get(\'_\');\n\n\nmsg.payload = {\n    method: \'gettxbyaddress\', \n    params: [msg.payload.address]\n};\n\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 287.076400756836,
-        'y' : 260.895851135254,
-        'wires' : [
-          [
-            '1a276478.09024c'
-          ]
-        ]
-      },
-      {
-        'id' : '808b0edf.80f64',
-        'type' : 'join',
-        'z' : '2c9dd332.05334c',
-        'name' : '',
-        'mode' : 'custom',
-        'build' : 'array',
-        'property' : 'payload',
-        'propertyType' : 'msg',
-        'key' : 'topic',
-        'joiner' : '\\n',
-        'joinerType' : 'str',
-        'accumulate' : false,
-        'timeout' : '',
-        'count' : '3',
-        'x' : 610,
-        'y' : 180,
-        'wires' : [
-          [
-            '6d052eef.a0912'
-          ]
-        ]
-      },
-      {
-        'id' : '575dc986.761ea8',
-        'type' : 'bcoin',
-        'z' : '2c9dd332.05334c',
-        'mode' : '1',
-        'method' : '',
-        'params' : [],
-        'name' : 'bcoin',
-        'x' : 450,
-        'y' : 80,
-        'wires' : [
-          [
-            '808b0edf.80f64'
-          ]
-        ]
-      },
-      {
-        'id' : 'b53dd569.a5f088',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : '',
-        'func' : '\n\nmsg.payload = {\n    method: \'getblockcount\', \n    params: []\n};\n\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 307.076400756836,
-        'y' : 80.8958511352539,
-        'wires' : [
-          [
-            '575dc986.761ea8'
-          ]
-        ]
       },
       {
         'id' : '4e47577b.ea57f8',
@@ -389,7 +252,7 @@ module.exports.up = function (done) {
         'z' : '2c9dd332.05334c',
         'name' : '',
         'statusCode' : '',
-        'x' : 1010,
+        'x' : 1050,
         'y' : 800,
         'wires' : []
       },
@@ -406,70 +269,7 @@ module.exports.up = function (done) {
         'y' : 800,
         'wires' : [
           [
-            '98d72b9a.7999f8',
-            'c88642a.faeddc'
-          ]
-        ]
-      },
-      {
-        'id' : '98d72b9a.7999f8',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : 'transform params',
-        'func' : 'msg.payload ={\n    method: \'getblockcount\',\n    params: []\n}\n\n\n\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 310,
-        'y' : 740,
-        'wires' : [
-          [
-            'b960e6b9.e1c2f8'
-          ]
-        ]
-      },
-      {
-        'id' : 'b960e6b9.e1c2f8',
-        'type' : 'bcoin',
-        'z' : '2c9dd332.05334c',
-        'mode' : '1',
-        'method' : '',
-        'name' : 'bcoin',
-        'x' : 530,
-        'y' : 740,
-        'wires' : [
-          [
-            '4945e333.41fc8c'
-          ]
-        ]
-      },
-      {
-        'id' : 'c88642a.faeddc',
-        'type' : 'function',
-        'z' : '2c9dd332.05334c',
-        'name' : 'transform params',
-        'func' : 'msg.payload ={\n    method: \'getcoinsbyaddress\',\n    params: [msg.req.params.addr]\n}\n\n\n\nreturn msg;',
-        'outputs' : 1,
-        'noerr' : 0,
-        'x' : 310,
-        'y' : 860,
-        'wires' : [
-          [
-            'e35ee454.485958'
-          ]
-        ]
-      },
-      {
-        'id' : 'e35ee454.485958',
-        'type' : 'bcoin',
-        'z' : '2c9dd332.05334c',
-        'mode' : '1',
-        'method' : '',
-        'name' : 'bcoin',
-        'x' : 530,
-        'y' : 860,
-        'wires' : [
-          [
-            '4945e333.41fc8c'
+            '2be633a7.9859fc'
           ]
         ]
       },
@@ -478,8 +278,8 @@ module.exports.up = function (done) {
         'type' : 'join',
         'z' : '2c9dd332.05334c',
         'name' : '',
-        'mode' : 'custom',
-        'build' : 'array',
+        'mode' : 'auto',
+        'build' : 'merged',
         'property' : 'payload',
         'propertyType' : 'msg',
         'key' : 'topic',
@@ -488,7 +288,7 @@ module.exports.up = function (done) {
         'accumulate' : false,
         'timeout' : '',
         'count' : '2',
-        'x' : 670,
+        'x' : 710,
         'y' : 800,
         'wires' : [
           [
@@ -504,11 +304,111 @@ module.exports.up = function (done) {
         'func' : 'const _ = global.get(\'_\');\n\nlet height = msg.payload[0];\nlet rawCoins = msg.payload[1];\n\n\n\n  msg.payload =  _.chain(rawCoins)\n    .filter(c => c.height > -1)\n    .map(rawCoin => {\n      return ({\n        address: rawCoin.address,\n        txid: rawCoin.hash,\n        scriptPubKey: rawCoin.script,\n        amount: rawCoin.value / Math.pow(10, 8),\n        satoshis: rawCoin.value,\n        height: rawCoin.height,\n        vout: rawCoin.index,\n        confirmations: height - rawCoin.height + 1\n      });\n    })\n    .orderBy(\'height\', \'desc\')\n    .value();\n\nreturn msg;',
         'outputs' : 1,
         'noerr' : 0,
-        'x' : 830,
+        'x' : 870,
         'y' : 800,
         'wires' : [
           [
             '4e47577b.ea57f8'
+          ]
+        ]
+      },
+      {
+        'id' : '8346fba1.12d028',
+        'type' : 'bcoin',
+        'z' : '2c9dd332.05334c',
+        'mode' : '1',
+        'method' : '',
+        'params' : [],
+        'name' : 'bcoin',
+        'x' : 570,
+        'y' : 800,
+        'wires' : [
+          [
+            '4945e333.41fc8c'
+          ]
+        ]
+      },
+      {
+        'id' : '2be633a7.9859fc',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'func' : '\nmsg.req.address = msg.payload.address\n\nmsg.payload = [{\n    method: \'getblockcount\', \n    params: []\n}, {\n    method: \'getcoinsbyaddress\',\n    params: [msg.req.params.addr]\n}];\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 310,
+        'y' : 800,
+        'wires' : [
+          [
+            '66707387.71cc7c'
+          ]
+        ]
+      },
+      {
+        'id' : '66707387.71cc7c',
+        'type' : 'split',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'splt' : '\\n',
+        'spltType' : 'str',
+        'arraySplt' : '1',
+        'arraySpltType' : 'len',
+        'stream' : false,
+        'addname' : '',
+        'x' : 430,
+        'y' : 800,
+        'wires' : [
+          [
+            '8346fba1.12d028'
+          ]
+        ]
+      },
+      {
+        'id' : '11fd83b0.8531dc',
+        'type' : 'async-function',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'func' : 'const _ = global.get(\'_\');\nconst genericMessages = global.get(\'factories\').messages.generic;\nconst rpc = global.get(\'rpc\');\n\nif (!msg.req.body.address) {\n     throw new Error(genericMessages.notEnoughArgs);\n  }\n\n  \n      \n    let rawCoins = await rpc(\'getcoinsbyaddress\', [msg.req.body.address]);\n    let height = await rpc(\'getblockcount\', []);\n      \n    let utxos = _.chain(rawCoins)\n    .filter(c => c.height > -1)\n    .map(rawCoin => {\n      return ({\n        address: rawCoin.address,\n        txid: rawCoin.hash,\n        scriptPubKey: rawCoin.script,\n        amount: rawCoin.value / Math.pow(10, 8),\n        satoshis: rawCoin.value,\n        height: rawCoin.height,\n        vout: rawCoin.index,\n        confirmations: height - rawCoin.height + 1\n      });\n    })\n    .orderBy(\'height\', \'desc\')\n    .value();\n    \n    \n    \n      let highestCoin = _.chain(utxos)\n    .sortBy(\'height\')\n    .last()\n    .defaults({\n      confirmations: 0,\n      height: 0\n    })\n    .value();\n    \n    \n    let balances = {\n    confirmations0: _.chain(utxos)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value(),\n    confirmations3: _.chain(utxos)\n      .filter(coin => coin.confirmations >= 3)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value(),\n    confirmations6: _.chain(utxos)\n      .filter(coin => coin.confirmations >= 6)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value()\n    };\n\n    msg.payload = {\n    model: \'BitcoinAccount\', \n    request: {\n       address: msg.payload.address,\n       lastBlockCheck: highestCoin.confirmations + highestCoin.height,\n       balances: {\n           confirmations0:  _.get(balances, \'confirmations0\', 0),\n           confirmations3: _.get(balances, \'confirmations3\', 0),\n           confirmations6: _.get(balances, \'confirmations6\', 0)\n       }\n   }\n};\n\n\n\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 2,
+        'x' : 310,
+        'y' : 180,
+        'wires' : [
+          [
+            '352fd4a8.2620ac'
+          ]
+        ]
+      },
+      {
+        'id' : '352fd4a8.2620ac',
+        'type' : 'mongo',
+        'z' : '2c9dd332.05334c',
+        'model' : 'EthAccount',
+        'request' : '{}',
+        'name' : 'mongo',
+        'mode' : '1',
+        'requestType' : '1',
+        'x' : 450,
+        'y' : 180,
+        'wires' : [
+          [
+            '2a6a8ea2.44a9e2'
+          ]
+        ]
+      },
+      {
+        'id' : '2a6a8ea2.44a9e2',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform output',
+        'func' : '\nlet factories = global.get("factories"); \n\nif(msg.payload.error){\n    msg.payload = factories.messages.generic.fail;\n    return msg;\n}\n    \n    \nmsg.payload = factories.messages.generic.success;\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 620,
+        'y' : 180,
+        'wires' : [
+          [
+            'e4822e75.693fd'
           ]
         ]
       }
