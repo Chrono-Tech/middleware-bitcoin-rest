@@ -29,7 +29,7 @@ module.exports = function (RED) {
           ipcInstance.of[config.node.ipcName].on('connect', res);
           ipcInstance.of[config.node.ipcName].on('error', rej);
         });
-      });
+      }).timeout(5000);
 
       try {
         msg.payload = await new Promise((res, rej) => {
@@ -39,7 +39,7 @@ module.exports = function (RED) {
               params: params
             })
           );
-        });
+        }).timeout(30000);
 
         node.send(msg);
       } catch (err) {

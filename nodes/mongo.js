@@ -27,7 +27,7 @@ module.exports = function (RED) {
 
       let models = mongoose.modelNames();
       let modelName = redConfig.mode === '1' ? msg.payload.model : redConfig.model;
-      let origName = _.find(models, m=> m.toLowerCase() === modelName.toLowerCase());
+      let origName = _.find(models, m => m.toLowerCase() === modelName.toLowerCase());
 
       if (!origName) {
         msg.payload = [];
@@ -41,7 +41,8 @@ module.exports = function (RED) {
           msg.payload = script.runInContext(context);
         }
 
-        msg.payload = await query(redConfig.requestType, origName, msg.payload.request);
+        msg.payload = JSON.parse(JSON.stringify(await query(redConfig.requestType, origName, msg.payload.request)));
+
         node.send(msg);
       } catch (err) {
         this.error(JSON.stringify(err), msg);
