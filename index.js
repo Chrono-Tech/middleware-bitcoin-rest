@@ -1,6 +1,5 @@
 const config = require('./config'),
   express = require('express'),
-  //routes = require('./routes'),
   http = require('http'),
   cors = require('cors'),
   bunyan = require('bunyan'),
@@ -10,6 +9,7 @@ const config = require('./config'),
   path = require('path'),
   NodeRedStorageModel = require('./models/nodeRedStorageModel'),
   NodeRedUserModel = require('./models/nodeRedUserModel'),
+  NodeRedMigrationModel = require('./models/migrationModel'),
   bodyParser = require('body-parser');
 
 /**
@@ -19,11 +19,12 @@ const config = require('./config'),
  */
 
 mongoose.Promise = Promise;
-mongoose.connect(config.mongo.uri, {useMongoClient: true});
+mongoose.connect(config.mongo.accounts.uri, {useMongoClient: true});
 mongoose.red = mongoose.createConnection(config.nodered.mongo.uri);
 
 mongoose.red.model(NodeRedStorageModel.collection.collectionName, NodeRedStorageModel.schema);
 mongoose.red.model(NodeRedUserModel.collection.collectionName, NodeRedUserModel.schema);
+mongoose.red.model(NodeRedMigrationModel.collection.collectionName, NodeRedMigrationModel.schema);
 
 mongoose.connection.on('disconnected', function () {
   log.error('mongo disconnected!');

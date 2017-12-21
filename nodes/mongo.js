@@ -1,21 +1,24 @@
 const mongoose = require('mongoose'),
+  mongooseUtils = require('mongoose/lib/utils'),
   _ = require('lodash'),
   vm = require('vm');
 
 module.exports = function (RED) {
 
-  async function query (type, modelName, query) {
+  async function query (type, modelName, query, requestDb) {
+
+    let connection = !requestDb || requestDb === '0' ? mongoose : (requestDb === '1' ? mongoose.accounts.test : mongoose.accounts.main);
 
     if (type === '0')
-      return await mongoose.models[modelName].find(query);
+      return await connection.models[modelName].find(query);
     if (type === '1')
-      return await new mongoose.models[modelName](query).save();
+      return (await new connection.models[modelName](query).save()).toObject();
     if (type === '2')
-      return await mongoose.models[modelName].update(...query);
+      return await connection.models[modelName].update(...query);
     if (type === '3')
-      return await mongoose.models[modelName].remove(query);
+      return await connection.models[modelName].remove(query);
     if (type === '4')
-      return await mongoose.models[modelName].aggregate(query);
+      return await connection.models[modelName].aggregate(query);
 
     return [];
   }
@@ -25,9 +28,11 @@ module.exports = function (RED) {
     let node = this;
     this.on('input', async function (msg) {
 
-      let models = mongoose.modelNames();
       let modelName = redConfig.mode === '1' ? msg.payload.model : redConfig.model;
-      let origName = _.find(models, m => m.toLowerCase() === modelName.toLowerCase());
+      let requestDb = redConfig.mode === '1' ? msg.payload.requestDb : redConfig.requestDb;
+
+      let models = (!requestDb || requestDb === '0' ? mongoose : (requestDb === '1' ? mongoose.accounts.test : mongoose.accounts.main)).modelNames();
+      let origName = _.find(models, m => m.toLowerCase() === mongooseUtils.toCollectionName(modelName));
 
       if (!origName) {
         msg.payload = [];
@@ -41,10 +46,10 @@ module.exports = function (RED) {
           msg.payload = script.runInContext(context);
         }
 
-        msg.payload = JSON.parse(JSON.stringify(await query(redConfig.requestType, origName, msg.payload.request)));
-
+        msg.payload = await query(redConfig.requestType, origName, msg.payload.request, requestDb);
         node.send(msg);
       } catch (err) {
+        console.log(err);
         this.error(JSON.stringify(err), msg);
       }
 

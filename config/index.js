@@ -2,6 +2,7 @@ require('dotenv').config();
 const path = require('path'),
   bunyan = require('bunyan'),
   util = require('util'),
+  _ = require('lodash'),
   ipcExec = require('../utils/ipcExec'),
   log = bunyan.createLogger({name: 'core.rest'});
 
@@ -26,8 +27,10 @@ const path = require('path'),
 
 let config = {
   mongo: {
-    uri: process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-    collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+    accounts: {
+      uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+      collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+    }
   },
   rest: {
     domain: process.env.DOMAIN || 'localhost',
@@ -41,7 +44,7 @@ let config = {
     mongo: {
       uri: process.env.NODERED_MONGO_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data'
     },
-    autoSyncMigrations: process.env.NODERED_AUTO_SYNC_MIGRATIONS || true,
+    autoSyncMigrations: _.isString(process.env.NODERED_AUTO_SYNC_MIGRATIONS) ? parseInt(process.env.NODERED_AUTO_SYNC_MIGRATIONS) : true,
     httpAdminRoot: '/admin',
     httpNodeRoot: '/',
     debugMaxLength: 1000,
