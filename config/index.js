@@ -32,6 +32,10 @@ let config = {
       collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
     }
   },
+  rabbit: {
+    url: process.env.RABBIT_URI || 'amqp://localhost:5672',
+    serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
+  },
   rest: {
     domain: process.env.DOMAIN || 'localhost',
     port: parseInt(process.env.REST_PORT) || 8081
