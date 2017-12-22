@@ -1,15 +1,12 @@
 const config = require('./config'),
+  mongoose = require('mongoose'),
   express = require('express'),
   http = require('http'),
   cors = require('cors'),
   bunyan = require('bunyan'),
   log = bunyan.createLogger({name: 'core.rest'}),
-  mongoose = require('mongoose'),
   RED = require('node-red'),
   path = require('path'),
-  NodeRedStorageModel = require('./models/nodeRedStorageModel'),
-  NodeRedUserModel = require('./models/nodeRedUserModel'),
-  NodeRedMigrationModel = require('./models/migrationModel'),
   bodyParser = require('body-parser');
 
 /**
@@ -18,18 +15,12 @@ const config = require('./config'),
  * and addresses manipulation
  */
 
-mongoose.Promise = Promise;
-mongoose.connect(config.mongo.accounts.uri, {useMongoClient: true});
-mongoose.red = mongoose.createConnection(config.nodered.mongo.uri);
-
-mongoose.red.model(NodeRedStorageModel.collection.collectionName, NodeRedStorageModel.schema);
-mongoose.red.model(NodeRedUserModel.collection.collectionName, NodeRedUserModel.schema);
-mongoose.red.model(NodeRedMigrationModel.collection.collectionName, NodeRedMigrationModel.schema);
-
-mongoose.connection.on('disconnected', function () {
-  log.error('mongo disconnected!');
-  process.exit(0);
-});
+[mongoose.connection, mongoose.red].forEach(connection =>
+  connection.on('disconnected', function () {
+    log.error('mongo disconnected!');
+    process.exit(0);
+  })
+);
 
 require('require-all')({
   dirname: path.join(__dirname, '/models'),

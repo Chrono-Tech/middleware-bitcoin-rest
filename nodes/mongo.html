@@ -8,7 +8,7 @@
       name: {value: 'mongo'},
       mode: {value: '1'},
       requestType: {value: '0'},
-      requestDb: {value: '0'}
+      dbAlias: {value: 'accounts'}
     },
     inputs: 1,
     outputs: 1,
@@ -91,18 +91,14 @@
         </select>
     </div>
 
-    <div class="form-row">
-        <label for="node-input-name"><i class="icon-tag"></i>Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+     <div class="form-row">
+        <label for="node-input-dbAlias"><i class="icon-tag"></i>Database alias</label>
+        <input type="text" id="node-input-dbAlias" placeholder="Db alias">
     </div>
 
     <div class="form-row">
-        <label>Database</label>
-        <select id="node-input-requestDb" style="width:200px;">
-            <option value="0">main</option>
-            <option value="1">accounts testnet</option>
-            <option value="2">accounts mainnet</option>
-        </select>
+        <label for="node-input-name"><i class="icon-tag"></i>Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
     </div>
 
     <div class="form-row">

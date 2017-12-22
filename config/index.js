@@ -4,6 +4,8 @@ const path = require('path'),
   util = require('util'),
   _ = require('lodash'),
   ipcExec = require('../utils/ipcExec'),
+  mongoose = require('mongoose'),
+  Promise = require('bluebird'),
   log = bunyan.createLogger({name: 'core.rest'});
 
 /**
@@ -30,6 +32,11 @@ let config = {
     accounts: {
       uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
       collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+    },
+    data: {
+      uri: process.env.MONGO_DATA_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+      collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'eth',
+      useData: parseInt(process.env.USE_MONGO_DATA) || 0
     }
   },
   rabbit: {
@@ -52,7 +59,6 @@ let config = {
     httpAdminRoot: '/admin',
     httpNodeRoot: '/',
     debugMaxLength: 1000,
-    adminAuth: require('../controllers/nodeRedAuthController'),
     nodesDir: path.join(__dirname, '../'),
     autoInstallModules: true,
     functionGlobalContext: {
@@ -65,7 +71,6 @@ let config = {
         }
       }
     },
-    storageModule: require('../controllers/nodeRedStorageController'),
     logging: {
       console: {
         level: 'info',
@@ -80,7 +85,16 @@ let config = {
 };
 
 module.exports = (() => {
+  mongoose.Promise = Promise;
 
-  config.nodered.functionGlobalContext.rpc = (...args)=> ipcExec.bind(this, config)(...args);
+  mongoose.red = mongoose.createConnection(config.nodered.mongo.uri);
+  mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri);
+
+  if (config.mongo.data.useData)
+    mongoose.data = mongoose.createConnection(config.mongo.data.uri);
+
+  config.nodered.adminAuth = require('../controllers/nodeRedAuthController');
+  config.nodered.storageModule = require('../controllers/nodeRedStorageController');
+  config.nodered.functionGlobalContext.rpc = (...args) => ipcExec.bind(this, config)(...args);
   return config;
 })();

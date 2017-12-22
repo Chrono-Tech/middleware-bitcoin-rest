@@ -2,16 +2,13 @@ const NodeRedStorageModel = require('../models/nodeRedStorageModel'),
   NodeRedMigrationModel = require('../models/migrationModel'),
   when = require('when'),
   _ = require('lodash'),
-  mongoose = require('mongoose'),
   fs = require('fs-extra'),
   flowTemplate = require('../migrations/templates/flowTemplate'),
   path = require('path');
 
 let simpleLoad = (type, path, parse = true) => {
   return when.resolve((async () => {
-
-    let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-    let storageDocument = await StorageModel.findOne({type: type, path: path});
+    let storageDocument = await NodeRedStorageModel.findOne({type: type, path: path});
 
     if (!storageDocument || !storageDocument.body)
       return [];
@@ -27,16 +24,13 @@ let simpleSave = (type, path, blob) => {
 
   return when.resolve((async () => {
 
-    let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-
-    let storageDocument = await StorageModel.findOne({type: type, path: path});
-
+    let storageDocument = await NodeRedStorageModel.findOne({type: type, path: path});
     if (!storageDocument || !storageDocument.body)
-      storageDocument = new StorageModel({type: type, path: path});
+      storageDocument = new NodeRedStorageModel({type: type, path: path});
 
     storageDocument.body = JSON.stringify(blob);
 
-    await StorageModel.update({_id: storageDocument._id}, storageDocument, {
+    await NodeRedStorageModel.update({_id: storageDocument._id}, storageDocument, {
       upsert: true,
       setDefaultsOnInsert: true
     })
@@ -57,24 +51,21 @@ let saveFlows = (blob) => {
       .groupBy('z')
       .toPairs()
       .map(pair => ({
-          path: pair[0] === 'undefined' ? 'tabs' : pair[0],
-          body: pair[1]
-        })
+        path: pair[0] === 'undefined' ? 'tabs' : pair[0],
+        body: pair[1]
+      })
       )
       .value();
 
-    let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-    let MigrationModel = mongoose.red.models[NodeRedMigrationModel.collection.collectionName];
-
     for (let item of items) {
 
-      let storageDocument = await StorageModel.findOne({type: 'flows', path: item.path});
+      let storageDocument = await NodeRedStorageModel.findOne({type: 'flows', path: item.path});
 
       if (!storageDocument || !storageDocument.body)
-        storageDocument = new StorageModel({type: 'flows', path: item.path});
+        storageDocument = new NodeRedStorageModel({type: 'flows', path: item.path});
 
       if (!_.isEqual(storageDocument.body, item.body)) {
-        let migrations = await MigrationModel.find({});
+        let migrations = await NodeRedMigrationModel.find({});
 
         let newMigrationName = _.chain(migrations)
           .filter(m => m.id)
@@ -87,7 +78,7 @@ let saveFlows = (blob) => {
       }
 
       storageDocument.body = item.body;
-      await StorageModel.update({_id: storageDocument._id}, storageDocument, {
+      await NodeRedStorageModel.update({_id: storageDocument._id}, storageDocument, {
         upsert: true,
         setDefaultsOnInsert: true
       })
@@ -103,8 +94,7 @@ let saveFlows = (blob) => {
 let loadFlows = () => {
   return when.resolve((async () => {
 
-    let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-    let storageDocuments = await StorageModel.find({type: 'flows'});
+    let storageDocuments = await NodeRedStorageModel.find({type: 'flows'});
 
     if (!storageDocuments)
       return [];
@@ -173,15 +163,14 @@ const mongodb = {
 
     return when.resolve((async () => {
       let resolvedType = 'library-' + type;
-      let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-      let storageDocument = await StorageModel.findOne({type: resolvedType, path: path});
+      let storageDocument = await NodeRedMigrationModel.findOne({type: resolvedType, path: path});
 
       if (storageDocument)
         return JSON.parse(storageDocument.body);
 
       // Probably a directory listing...
       // Crudely return everything.
-      let storageDocuments = await StorageModel.find({type: resolvedType});
+      let storageDocuments = await NodeRedMigrationModel.find({type: resolvedType});
       let result = sortDocumentsIntoPaths(storageDocuments);
       return result[path] || [];
 
@@ -192,11 +181,10 @@ const mongodb = {
 
     return when.promise((async () => {
       let resolvedType = 'library-' + type;
-      let StorageModel = mongoose.red.models[NodeRedStorageModel.collection.collectionName];
-      let storageDocument = await StorageModel.findOne({type: resolvedType, path: path});
+      let storageDocument = await NodeRedMigrationModel.findOne({type: resolvedType, path: path});
 
       if (!storageDocument)
-        storageDocument = new StorageModel({type: resolvedType, path: path});
+        storageDocument = new NodeRedMigrationModel({type: resolvedType, path: path});
 
       storageDocument.meta = JSON.stringify(meta);
       storageDocument.body = JSON.stringify(body);
