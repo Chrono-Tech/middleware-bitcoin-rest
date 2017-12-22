@@ -1,15 +1,13 @@
 const config = require('./config'),
+  mongoose = require('mongoose'),
   express = require('express'),
-  //routes = require('./routes'),
   http = require('http'),
   cors = require('cors'),
   bunyan = require('bunyan'),
   log = bunyan.createLogger({name: 'core.rest'}),
-  mongoose = require('mongoose'),
   RED = require('node-red'),
   path = require('path'),
-  NodeRedStorageModel = require('./models/nodeRedStorageModel'),
-  NodeRedUserModel = require('./models/nodeRedUserModel'),
+  _ = require('lodash'),
   bodyParser = require('body-parser');
 
 /**
@@ -18,35 +16,37 @@ const config = require('./config'),
  * and addresses manipulation
  */
 
-mongoose.Promise = Promise;
-mongoose.connect(config.mongo.uri, {useMongoClient: true});
-mongoose.red = mongoose.createConnection(config.nodered.mongo.uri);
-
-mongoose.red.model(NodeRedStorageModel.collection.collectionName, NodeRedStorageModel.schema);
-mongoose.red.model(NodeRedUserModel.collection.collectionName, NodeRedUserModel.schema);
-
-mongoose.connection.on('disconnected', function () {
-  log.error('mongo disconnected!');
-  process.exit(0);
-});
+_.chain([mongoose.accounts, mongoose.red, mongoose.data])
+  .compact().forEach(connection =>
+  connection.on('disconnected', function () {
+    log.error('mongo disconnected!');
+    process.exit(0);
+  })
+).value();
 
 require('require-all')({
   dirname: path.join(__dirname, '/models'),
   filter: /(.+Model)\.js$/
 });
 
-let app = express();
-let httpServer = http.createServer(app);
-app.use(cors());
-app.use(bodyParser.urlencoded({extended: false}));
-app.use(bodyParser.json());
+const init = async () => {
 
-RED.init(httpServer, config.nodered);
-app.use(config.nodered.httpAdminRoot, RED.httpAdmin);
-app.use(config.nodered.httpNodeRoot, RED.httpNode);
+  if (config.nodered.autoSyncMigrations)
+    await require('./migrate');
 
-httpServer.listen(config.rest.port);
-RED.start();
+  let app = express();
+  let httpServer = http.createServer(app);
+  app.use(cors());
+  app.use(bodyParser.urlencoded({extended: false}));
+  app.use(bodyParser.json());
 
+  RED.init(httpServer, config.nodered);
+  app.use(config.nodered.httpAdminRoot, RED.httpAdmin);
+  app.use(config.nodered.httpNodeRoot, RED.httpNode);
 
+  httpServer.listen(config.rest.port);
+  RED.start();
 
+};
+
+module.exports = init();

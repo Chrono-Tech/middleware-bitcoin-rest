@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "amqp-ts": "^1.4.0",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bunyan": "^1.8.12",
@@ -14,7 +15,6 @@
     "mongoose": "^4.11.7",
     "node-ipc": "^9.1.1",
     "node-red": "^0.17.5",
-    "node-red-contrib-amqp": "^0.4.5",
     "query-to-mongo": "^0.7.0",
     "require-all": "^2.2.0"
   },
@@ -26,7 +26,8 @@
     "chai": "^4.1.1",
     "mocha": "^3.5.0",
     "request": "^2.81.0",
-    "middleware-bitcoin-blockprocessor": "github:chronobank/middleware-bitcoin-blockprocessor"
+    "middleware-bitcoin-blockprocessor": "github:chronobank/middleware-bitcoin-blockprocessor",
+    "middleware-bitcoin-balance-processor": "github:chronobank/middleware-bitcoin-balance-processor"
   },
   "scripts": {
     "lint": "node ./node_modules/eslint/bin/eslint.js -c .eslintrc.js --ext .js --fix --ignore-path .eslintignore .",

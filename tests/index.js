@@ -14,8 +14,7 @@ const config = require('../config'),
   Promise = require('bluebird'),
   request = Promise.promisify(require('request')),
   Coin = require('bcoin/lib/primitives/coin'),
-  scope = {};
-
+  scope = {},
   mongoose = require('mongoose');
 
 mongoose.Promise = Promise;
@@ -34,7 +33,7 @@ describe('core/rest', function () {
 
     ctx.accounts.push(keyPair, keyPair2, keyPair3, keyPair4);
 
-    mongoose.connect(config.mongo.uri, {useMongoClient: true});
+    mongoose.connect(config.mongo.accounts.uri, {useMongoClient: true});
   });
 
   after(() => {
@@ -138,7 +137,13 @@ describe('core/rest', function () {
 
   });
 
+  it('generate 1 block', async () => {
+    let keyring = new bcoin.keyring(ctx.accounts[3].privateKey, ctx.network);
+    return await ipcExec('generatetoaddress', [1, keyring.getAddress().toString()])
+  });
+
   it('validate potential balance changes for accounts', async () => {
+    await Promise.delay(10000);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     let keyring2 = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
     let keyring3 = new bcoin.keyring(ctx.accounts[2].privateKey, ctx.network);

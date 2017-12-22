@@ -3,258 +3,412 @@
 module.exports.id = '1.01';
 
 /**
- * @description tx flow
+ * @description address flow
  * @param done
  */
 
 module.exports.up = function (done) {
   let coll = this.db.collection('noderedstorages');
   coll.insert({
-    'meta': {},
-    'type': 'flows',
-    'path': 'e415e43d.f10178',
-    'body': [
+    'meta' : {},
+    'type' : 'flows',
+    'path' : '2c9dd332.05334c',
+    'body' : [
       {
-        'id': 'd6a414d4.4d3f58',
-        'type': 'web3',
-        'z': 'e415e43d.f10178',
-        'mode': '1',
-        'method': 'web3_clientVersion',
-        'params': [
-          '55'
-        ],
-        'name': 'web3',
-        'x': 815.000015258789,
-        'y': 263.750003814697,
-        'wires': [
+        'id' : '5a35929d.0a716c',
+        'type' : 'http in',
+        'z' : '2c9dd332.05334c',
+        'name' : 'create addr',
+        'url' : '/addr',
+        'method' : 'post',
+        'upload' : false,
+        'swaggerDoc' : '',
+        'x' : 150,
+        'y' : 180,
+        'wires' : [
           [
-            'bc865a57.2be5f8'
+            '11fd83b0.8531dc'
           ]
         ]
       },
       {
-        'id': '12389700.950d89',
-        'type': 'http response',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'statusCode': '',
-        'x': 1397.50001907349,
-        'y': 283.750003814697,
-        'wires': []
+        'id' : 'e4822e75.693fd',
+        'type' : 'http response',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'statusCode' : '',
+        'x' : 830,
+        'y' : 180,
+        'wires' : []
       },
       {
-        'id': '56898567.f2105c',
-        'type': 'http in',
-        'z': 'e415e43d.f10178',
-        'name': 'history',
-        'url': '/tx/:addr/history/:startBlock/:endBlock',
-        'method': 'get',
-        'upload': false,
-        'swaggerDoc': '',
-        'x': 270,
-        'y': 260,
-        'wires': [
+        'id' : '65927d71.4e8c44',
+        'type' : 'http in',
+        'z' : '2c9dd332.05334c',
+        'name' : 'remove addr',
+        'url' : '/addr',
+        'method' : 'delete',
+        'upload' : false,
+        'swaggerDoc' : '',
+        'x' : 150,
+        'y' : 340,
+        'wires' : [
           [
-            'c94cf16f.f9c25'
+            '316484c0.63001c'
           ]
         ]
       },
       {
-        'id': '6cb71338.08ce1c',
-        'type': 'function',
-        'z': 'e415e43d.f10178',
-        'name': 'filter txs',
-        'func': 'const _ = global.get(\'_\');\n\n\nlet address = msg.req.params.addr.toLowerCase();\n\nmsg.payload = _.chain(msg.payload)\n.filter(block=> _.has(block, \'transactions\'))\n.map(block=>block.transactions)\n.flattenDeep()\n.filter(tx=>[tx.to, tx.from].includes(address))\n.value()\n\nreturn msg;',
-        'outputs': 1,
-        'noerr': 0,
-        'x': 1160.00001525879,
-        'y': 263.750003814697,
-        'wires': [
+        'id' : 'd0426981.27e8a8',
+        'type' : 'http response',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'statusCode' : '',
+        'x' : 990,
+        'y' : 340,
+        'wires' : []
+      },
+      {
+        'id' : '7c68e0a0.c140d',
+        'type' : 'mongo',
+        'z' : '2c9dd332.05334c',
+        'model' : 'EthAccount',
+        'request' : '{}',
+        'name' : 'mongo',
+        'mode' : '1',
+        'requestType' : '3',
+        'x' : 550,
+        'y' : 340,
+        'wires' : [
           [
-            '12389700.950d89'
+            'cdd0bdcd.24b59'
           ]
         ]
       },
       {
-        'id': 'c94cf16f.f9c25',
-        'type': 'function',
-        'z': 'e415e43d.f10178',
-        'name': 'transform params',
-        'func': '\nconst _ = global.get(\'_\');\n\n/*msg.payload = {\n    address: msg.req.params.addr,\n    startBlock: msg.req.params.startBlock,\n    endBlock: msg.req.params.endBlock\n}*/\n\nlet start = parseInt(msg.req.params.startBlock);\nlet end = parseInt(msg.req.params.endBlock);\n\n\nmsg.payload = _.chain(new Array(end - start))\n.map((e, i)=>({\n    method: \'eth_getBlockByNumber\',\n    params: [start + i, true]\n})).value()\n\n\n\nreturn msg;',
-        'outputs': 1,
-        'noerr': 0,
-        'x': 460.000007629395,
-        'y': 260.000003814697,
-        'wires': [
+        'id' : 'cdd0bdcd.24b59',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform output',
+        'func' : '\nlet factories = global.get("factories"); \n\nif(msg.payload.error){\n    msg.payload = factories.messages.generic.fail;\n    return msg;\n}\n    \n    \nmsg.payload = factories.messages.generic.success;\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 760,
+        'y' : 340,
+        'wires' : [
           [
-            'e3b7b3c3.c4b1a'
+            'd0426981.27e8a8'
           ]
         ]
       },
       {
-        'id': 'e3b7b3c3.c4b1a',
-        'type': 'split',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'splt': '\\n',
-        'spltType': 'str',
-        'arraySplt': 1,
-        'arraySpltType': 'len',
-        'stream': false,
-        'addname': '',
-        'x': 660.000009536743,
-        'y': 262.500003814697,
-        'wires': [
+        'id' : '316484c0.63001c',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform params',
+        'func' : '\nmsg.payload = {\n    model: \'BitcoinAccount\', \n    request: {\n       address: msg.payload.address\n   }\n};\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 350,
+        'y' : 340,
+        'wires' : [
           [
-            'd6a414d4.4d3f58',
-            'a0517c8d.c029'
+            '7c68e0a0.c140d'
           ]
         ]
       },
       {
-        'id': 'bc865a57.2be5f8',
-        'type': 'join',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'mode': 'auto',
-        'build': 'string',
-        'property': 'payload',
-        'propertyType': 'msg',
-        'key': 'topic',
-        'joiner': '\\n',
-        'joinerType': 'str',
-        'accumulate': false,
-        'timeout': '',
-        'count': '',
-        'x': 985,
-        'y': 261.25,
-        'wires': [
+        'id' : '468de3dc.eb162c',
+        'type' : 'http in',
+        'z' : '2c9dd332.05334c',
+        'name' : 'balance',
+        'url' : '/addr/:addr/balance',
+        'method' : 'get',
+        'upload' : false,
+        'swaggerDoc' : '',
+        'x' : 130,
+        'y' : 580,
+        'wires' : [
           [
-            '6cb71338.08ce1c'
+            '6731d0f7.68fb4'
           ]
         ]
       },
       {
-        'id': 'a0517c8d.c029',
-        'type': 'debug',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'active': true,
-        'console': 'false',
-        'complete': 'false',
-        'x': 786.25,
-        'y': 162.5,
-        'wires': []
-      },
-      {
-        'id': '620e0f8.ccd2bf',
-        'type': 'web3',
-        'z': 'e415e43d.f10178',
-        'mode': '1',
-        'method': 'eth_getTransactionByHash',
-        'params': [],
-        'name': 'web3',
-        'x': 710.000011444092,
-        'y': 588.750008583069,
-        'wires': [
+        'id' : '6731d0f7.68fb4',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform params',
+        'func' : '\nmsg.payload = {\n    model: \'BitcoinAccount\', \n    request: {\n       address: msg.req.params.addr\n   }\n};\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 332.500003814698,
+        'y' : 579.99999809265,
+        'wires' : [
           [
-            '70fb1e14.f84a2',
-            '6b2f3912.a09f08'
+            'a66b89d5.08b868'
           ]
         ]
       },
       {
-        'id': '6b2f3912.a09f08',
-        'type': 'http response',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'statusCode': '',
-        'x': 907.500019073486,
-        'y': 587.500009536743,
-        'wires': []
-      },
-      {
-        'id': '12413869.ddc528',
-        'type': 'http in',
-        'z': 'e415e43d.f10178',
-        'name': 'tx',
-        'url': '/tx/:hash',
-        'method': 'get',
-        'upload': false,
-        'swaggerDoc': '',
-        'x': 288.75,
-        'y': 587.499996185303,
-        'wires': [
+        'id' : 'a66b89d5.08b868',
+        'type' : 'mongo',
+        'z' : '2c9dd332.05334c',
+        'model' : 'EthAccount',
+        'request' : '{}',
+        'name' : 'mongo',
+        'mode' : '1',
+        'requestType' : '0',
+        'x' : 522.500003814698,
+        'y' : 581.24999904632,
+        'wires' : [
           [
-            'b7cddb28.6e1828'
+            '36a27ede.06cd52'
           ]
         ]
       },
       {
-        'id': 'b7cddb28.6e1828',
-        'type': 'function',
-        'z': 'e415e43d.f10178',
-        'name': 'transform params',
-        'func': 'msg.payload ={\n    method: \'eth_getTransactionByHash\',\n    params: [msg.req.params.hash]\n}\n\n\n\nreturn msg;',
-        'outputs': 1,
-        'noerr': 0,
-        'x': 478.750007629395,
-        'y': 587.5,
-        'wires': [
+        'id' : '36a27ede.06cd52',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform output',
+        'func' : '\nconst _ = global.get(\'_\');\n\nlet account = msg.payload[0];\n\n\nmsg.payload = {\n    confirmations0: {\n      satoshis: _.get(account, \'balances.confirmations0\', 0),\n      amount: _.get(account, \'balances.confirmations0\', 0) / 100000000\n    },\n    confirmations3: {\n      satoshis: _.get(account, \'balances.confirmations3\', 0),\n      amount: _.get(account, \'balances.confirmations3\', 0) / 100000000\n    },\n    confirmations6: {\n      satoshis: _.get(account, \'balances.confirmations6\', 0),\n      amount: _.get(account, \'balances.confirmations6\', 0) / 100000000\n    },\n  };\n\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 716.250007629395,
+        'y' : 581.24999904632,
+        'wires' : [
           [
-            '620e0f8.ccd2bf'
+            '6e227f25.b210e'
           ]
         ]
       },
       {
-        'id': '70fb1e14.f84a2',
-        'type': 'debug',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'active': true,
-        'console': 'false',
-        'complete': 'false',
-        'x': 920.000011444092,
-        'y': 498.750007629395,
-        'wires': []
+        'id' : '6e227f25.b210e',
+        'type' : 'http response',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'statusCode' : '',
+        'x' : 951.250007629395,
+        'y' : 579.99999904632,
+        'wires' : []
       },
       {
-        'id': 'b68ffffb.8e49e',
-        'type': 'catch',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'scope': null,
-        'x': 301,
-        'y': 780,
-        'wires': [
+        'id' : 'e859d127.685df',
+        'type' : 'catch',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'scope' : null,
+        'x' : 200,
+        'y' : 1060,
+        'wires' : [
           [
-            '49075d44.432d44'
+            'd47923c.db3aae',
+            'dee6708f.9e557'
           ]
         ]
       },
       {
-        'id': '5c2fd91f.e496a8',
-        'type': 'http response',
-        'z': 'e415e43d.f10178',
-        'name': '',
-        'statusCode': '',
-        'x': 758,
-        'y': 781,
-        'wires': []
+        'id' : '2e2f80ee.29994',
+        'type' : 'http response',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'statusCode' : '',
+        'x' : 657,
+        'y' : 1061,
+        'wires' : []
       },
       {
-        'id': '49075d44.432d44',
-        'type': 'function',
-        'z': 'e415e43d.f10178',
-        'name': 'transform',
-        'func': '\nlet factories = global.get("factories"); \n\nmsg.payload = factories.messages.generic.fail;\n    \nreturn msg;',
-        'outputs': 1,
-        'noerr': 0,
-        'x': 542,
-        'y': 780,
-        'wires': [
+        'id' : 'd47923c.db3aae',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform',
+        'func' : '\nlet factories = global.get("factories"); \nlet error = msg.error.message;\ntry {\n    error = JSON.parse(error);\n}catch(e){}\n\nmsg.payload = error && error.code === 11000 ? \nfactories.messages.address.existAddress :\n\nmsg.error.message && msg.error.code ?\nmsg.error :\nfactories.messages.generic.fail;\n   \nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 441,
+        'y' : 1060,
+        'wires' : [
           [
-            '5c2fd91f.e496a8'
+            '2e2f80ee.29994'
+          ]
+        ]
+      },
+      {
+        'id' : 'dee6708f.9e557',
+        'type' : 'debug',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'active' : true,
+        'console' : 'false',
+        'complete' : 'error',
+        'x' : 537,
+        'y' : 958,
+        'wires' : []
+      },
+      {
+        'id' : '4e47577b.ea57f8',
+        'type' : 'http response',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'statusCode' : '',
+        'x' : 1050,
+        'y' : 800,
+        'wires' : []
+      },
+      {
+        'id' : '375e54b9.33dc5c',
+        'type' : 'http in',
+        'z' : '2c9dd332.05334c',
+        'name' : 'utxo',
+        'url' : '/addr/:addr/utxo',
+        'method' : 'get',
+        'upload' : false,
+        'swaggerDoc' : '',
+        'x' : 130,
+        'y' : 800,
+        'wires' : [
+          [
+            '2be633a7.9859fc'
+          ]
+        ]
+      },
+      {
+        'id' : '4945e333.41fc8c',
+        'type' : 'join',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'mode' : 'auto',
+        'build' : 'merged',
+        'property' : 'payload',
+        'propertyType' : 'msg',
+        'key' : 'topic',
+        'joiner' : '\\n',
+        'joinerType' : 'str',
+        'accumulate' : false,
+        'timeout' : '',
+        'count' : '2',
+        'x' : 710,
+        'y' : 800,
+        'wires' : [
+          [
+            '2897ae84.380082'
+          ]
+        ]
+      },
+      {
+        'id' : '2897ae84.380082',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'func' : 'const _ = global.get(\'_\');\n\nlet height = msg.payload[0];\nlet rawCoins = msg.payload[1];\n\n\n\n  msg.payload =  _.chain(rawCoins)\n    .filter(c => c.height > -1)\n    .map(rawCoin => {\n      return ({\n        address: rawCoin.address,\n        txid: rawCoin.hash,\n        scriptPubKey: rawCoin.script,\n        amount: rawCoin.value / Math.pow(10, 8),\n        satoshis: rawCoin.value,\n        height: rawCoin.height,\n        vout: rawCoin.index,\n        confirmations: height - rawCoin.height + 1\n      });\n    })\n    .orderBy(\'height\', \'desc\')\n    .value();\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 870,
+        'y' : 800,
+        'wires' : [
+          [
+            '4e47577b.ea57f8'
+          ]
+        ]
+      },
+      {
+        'id' : '8346fba1.12d028',
+        'type' : 'bcoin',
+        'z' : '2c9dd332.05334c',
+        'mode' : '1',
+        'method' : '',
+        'params' : [],
+        'name' : 'bcoin',
+        'x' : 570,
+        'y' : 800,
+        'wires' : [
+          [
+            '4945e333.41fc8c'
+          ]
+        ]
+      },
+      {
+        'id' : '2be633a7.9859fc',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'func' : '\nmsg.req.address = msg.payload.address\n\nmsg.payload = [{\n    method: \'getblockcount\', \n    params: []\n}, {\n    method: \'getcoinsbyaddress\',\n    params: [msg.req.params.addr]\n}];\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 310,
+        'y' : 800,
+        'wires' : [
+          [
+            '66707387.71cc7c'
+          ]
+        ]
+      },
+      {
+        'id' : '66707387.71cc7c',
+        'type' : 'split',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'splt' : '\\n',
+        'spltType' : 'str',
+        'arraySplt' : '1',
+        'arraySpltType' : 'len',
+        'stream' : false,
+        'addname' : '',
+        'x' : 430,
+        'y' : 800,
+        'wires' : [
+          [
+            '8346fba1.12d028'
+          ]
+        ]
+      },
+      {
+        'id' : '11fd83b0.8531dc',
+        'type' : 'async-function',
+        'z' : '2c9dd332.05334c',
+        'name' : '',
+        'func' : 'const _ = global.get(\'_\');\nconst genericMessages = global.get(\'factories\').messages.generic;\nconst rpc = global.get(\'rpc\');\n\nif (!msg.req.body.address) {\n     throw new Error(genericMessages.notEnoughArgs);\n  }\n\n  \n      \n    let rawCoins = await rpc(\'getcoinsbyaddress\', [msg.req.body.address]);\n    let height = await rpc(\'getblockcount\', []);\n      \n    let utxos = _.chain(rawCoins)\n    .filter(c => c.height > -1)\n    .map(rawCoin => {\n      return ({\n        address: rawCoin.address,\n        txid: rawCoin.hash,\n        scriptPubKey: rawCoin.script,\n        amount: rawCoin.value / Math.pow(10, 8),\n        satoshis: rawCoin.value,\n        height: rawCoin.height,\n        vout: rawCoin.index,\n        confirmations: height - rawCoin.height + 1\n      });\n    })\n    .orderBy(\'height\', \'desc\')\n    .value();\n    \n    \n    \n      let highestCoin = _.chain(utxos)\n    .sortBy(\'height\')\n    .last()\n    .defaults({\n      confirmations: 0,\n      height: 0\n    })\n    .value();\n    \n    \n    let balances = {\n    confirmations0: _.chain(utxos)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value(),\n    confirmations3: _.chain(utxos)\n      .filter(coin => coin.confirmations >= 3)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value(),\n    confirmations6: _.chain(utxos)\n      .filter(coin => coin.confirmations >= 6)\n      .map(coin => coin.satoshis)\n      .sum()\n      .defaultTo(0)\n      .value()\n    };\n\n    msg.payload = {\n    model: \'BitcoinAccount\', \n    request: {\n       address: msg.payload.address,\n       lastBlockCheck: highestCoin.confirmations + highestCoin.height,\n       balances: {\n           confirmations0:  _.get(balances, \'confirmations0\', 0),\n           confirmations3: _.get(balances, \'confirmations3\', 0),\n           confirmations6: _.get(balances, \'confirmations6\', 0)\n       }\n   }\n};\n\n\n\n\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 2,
+        'x' : 310,
+        'y' : 180,
+        'wires' : [
+          [
+            '352fd4a8.2620ac'
+          ]
+        ]
+      },
+      {
+        'id' : '352fd4a8.2620ac',
+        'type' : 'mongo',
+        'z' : '2c9dd332.05334c',
+        'model' : 'EthAccount',
+        'request' : '{}',
+        'name' : 'mongo',
+        'mode' : '1',
+        'requestType' : '1',
+        'x' : 450,
+        'y' : 180,
+        'wires' : [
+          [
+            '2a6a8ea2.44a9e2'
+          ]
+        ]
+      },
+      {
+        'id' : '2a6a8ea2.44a9e2',
+        'type' : 'function',
+        'z' : '2c9dd332.05334c',
+        'name' : 'transform output',
+        'func' : '\nlet factories = global.get("factories"); \n\nif(msg.payload.error){\n    msg.payload = factories.messages.generic.fail;\n    return msg;\n}\n    \n    \nmsg.payload = factories.messages.generic.success;\nreturn msg;',
+        'outputs' : 1,
+        'noerr' : 0,
+        'x' : 620,
+        'y' : 180,
+        'wires' : [
+          [
+            'e4822e75.693fd'
           ]
         ]
       }
@@ -266,7 +420,7 @@ module.exports.down = function (done) {
   let coll = this.db.collection('noderedstorages');
   coll.remove({
     'type': 'flows',
-    'path': 'e415e43d.f10178'
+    'path': '2c9dd332.05334c'
   }, done);
   done();
 };
