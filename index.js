@@ -7,6 +7,7 @@ const config = require('./config'),
   log = bunyan.createLogger({name: 'core.rest'}),
   RED = require('node-red'),
   path = require('path'),
+  _ = require('lodash'),
   bodyParser = require('body-parser');
 
 /**
@@ -15,12 +16,13 @@ const config = require('./config'),
  * and addresses manipulation
  */
 
-[mongoose.connection, mongoose.red].forEach(connection =>
+_.chain([mongoose.accounts, mongoose.red, mongoose.data])
+  .compact().forEach(connection =>
   connection.on('disconnected', function () {
     log.error('mongo disconnected!');
     process.exit(0);
   })
-);
+).value();
 
 require('require-all')({
   dirname: path.join(__dirname, '/models'),
