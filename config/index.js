@@ -31,11 +31,11 @@ let config = {
   mongo: {
     accounts: {
       uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-      collectionPrefix: process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+      collectionPrefix: process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX ||'bitcoin'
     },
     data: {
       uri: process.env.MONGO_DATA_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-      collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'eth',
+      collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
       useData: parseInt(process.env.USE_MONGO_DATA) || 0
     }
   },
@@ -68,6 +68,12 @@ let config = {
           address: require('../factories/messages/addressMessageFactory'),
           generic: require('../factories/messages/genericMessageFactory'),
           tx: require('../factories/messages/txMessageFactory')
+        }
+      },
+      settings: {
+        mongo: {
+          accountPrefix: process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
+          collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
         }
       }
     },
