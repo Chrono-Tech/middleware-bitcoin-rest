@@ -14,8 +14,7 @@ const config = require('../config'),
   Promise = require('bluebird'),
   request = Promise.promisify(require('request')),
   Coin = require('bcoin/lib/primitives/coin'),
-  scope = {};
-
+  scope = {},
   mongoose = require('mongoose');
 
 mongoose.Promise = Promise;
