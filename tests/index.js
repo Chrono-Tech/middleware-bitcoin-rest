@@ -143,7 +143,7 @@ describe('core/rest', function () {
   });
 
   it('validate potential balance changes for accounts', async () => {
-    await Promise.delay(10000);
+    await Promise.delay(20000);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     let keyring2 = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
     let keyring3 = new bcoin.keyring(ctx.accounts[2].privateKey, ctx.network);
