@@ -3,6 +3,7 @@ require('dotenv/config');
 const config = require('../config'),
   Network = require('bcoin/lib/protocol/network'),
   bcoin = require('bcoin'),
+  amqp = require('amqplib'),
   ctx = {
     network: null,
     accounts: []
@@ -58,13 +59,31 @@ describe('core/rest', function () {
   });
 
   it('generate some coins for accountA', async () => {
+    scope.height = await ipcExec('getblockcount', []);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     return await ipcExec('generatetoaddress', [50, keyring.getAddress().toString()])
   });
 
   it('unlock coins for account A by generating some coins for accountD', async () => {
     let keyring = new bcoin.keyring(ctx.accounts[3].privateKey, ctx.network);
-    return await ipcExec('generatetoaddress', [100, keyring.getAddress().toString()])
+    let amqpInstance = await amqp.connect(config.rabbit.url);
+    let channel = await amqpInstance.createChannel();
+    try {
+      await channel.assertExchange('events', 'topic', {durable: false});
+      await channel.assertQueue(`app_${config.rabbit.serviceName}_test.block`);
+      await channel.bindQueue(`app_${config.rabbit.serviceName}_test.block`, 'events', `${config.rabbit.serviceName}_block`);
+    } catch (e) {
+      channel = await amqpInstance.createChannel();
+    }
+
+    return await new Promise(res => {
+      channel.consume(`app_${config.rabbit.serviceName}_test.block`, data => {
+        let payload = JSON.parse(data.content.toString());
+        if (payload.block >= scope.height + 150)
+          res();
+      }, {noAck: true});
+      ipcExec('generatetoaddress', [100, keyring.getAddress().toString()]);
+    })
   });
 
   it('register addresses', async () => {
@@ -143,7 +162,7 @@ describe('core/rest', function () {
   });
 
   it('validate potential balance changes for accounts', async () => {
-    await Promise.delay(20000);
+    await Promise.delay(60000);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     let keyring2 = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
     let keyring3 = new bcoin.keyring(ctx.accounts[2].privateKey, ctx.network);
