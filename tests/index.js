@@ -106,6 +106,7 @@ describe('core/rest', function () {
   });
 
   it('send coins to accountB and accountC', async () => {
+    await Promise.delay(60000);
 
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     let keyring2 = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
