@@ -18,11 +18,11 @@ const config = require('./config'),
 
 _.chain([mongoose.accounts, mongoose.red, mongoose.data])
   .compact().forEach(connection =>
-  connection.on('disconnected', function () {
-    log.error('mongo disconnected!');
-    process.exit(0);
-  })
-).value();
+    connection.on('disconnected', function () {
+      log.error('mongo disconnected!');
+      process.exit(0);
+    })
+  ).value();
 
 require('require-all')({
   dirname: path.join(__dirname, '/models'),
