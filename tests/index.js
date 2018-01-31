@@ -4,19 +4,22 @@ const config = require('../config'),
   Network = require('bcoin/lib/protocol/network'),
   bcoin = require('bcoin'),
   amqp = require('amqplib'),
-  ctx = {
+  Promise = require('bluebird'),
+  mongoose = require('mongoose');
+
+mongoose.Promise = Promise;
+mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri);
+
+const ctx = {
     network: null,
     accounts: []
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
   ipcExec = require('./helpers/ipcExec'),
-  Promise = require('bluebird'),
   request = Promise.promisify(require('request')),
-  scope = {},
-  mongoose = require('mongoose');
+  scope = {};
 
-mongoose.Promise = Promise;
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 describe('core/rest', function () {
@@ -78,7 +81,6 @@ describe('core/rest', function () {
     })
   });
 
-
   it('register addresses', async () => {
     await Promise.delay(10000);
     let responses = await Promise.all(ctx.accounts.map(account => {
@@ -117,6 +119,5 @@ describe('core/rest', function () {
       expect(resp.body.confirmations0.satoshis).to.be.above(1)
     )
   });
-
 
 });
