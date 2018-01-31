@@ -4,6 +4,7 @@
   "main": "index.js",
   "dependencies": {
     "amqp-ts": "^1.4.0",
+    "middleware-service-sdk": "github:ega-forever/middleware-sdk#feature/MD-108",
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bunyan": "^1.8.12",
