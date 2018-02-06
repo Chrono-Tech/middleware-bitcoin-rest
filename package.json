@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "middleware-service-sdk": "github:ChronoBank/middleware-service-sdk",
+    "middleware_service.sdk": "github:chronobank/middleware-service-sdk",
     "bluebird": "^3.5.0",
     "bunyan": "^1.8.12",
     "dotenv": "^4.0.0",
