@@ -3,19 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
-    "amqp-ts": "^1.4.0",
+    "middleware_service.sdk": "github:chronobank/middleware-service-sdk",
     "bluebird": "^3.5.0",
-    "body-parser": "^1.17.2",
     "bunyan": "^1.8.12",
-    "cors": "^2.8.4",
     "dotenv": "^4.0.0",
-    "express": "^4.15.4",
     "lodash": "^4.17.4",
-    "mongodb-migrations": "^0.8.5",
     "mongoose": "^4.11.7",
     "node-ipc": "^9.1.1",
-    "node-red": "^0.17.5",
-    "query-to-mongo": "^0.7.0",
     "require-all": "^2.2.0"
   },
   "devDependencies": {

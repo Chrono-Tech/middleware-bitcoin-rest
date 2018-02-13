@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
   config = require('../config'),
-  messages = require('../factories/messages/addressMessageFactory');
+  messages = require('middleware_service.sdk').factories.messages.addressMessageFactory;
 
 /** @model accountModel
  *  @description account model - represents an bitcoin account
@@ -17,6 +17,7 @@ const Account = new mongoose.Schema({
     confirmations3: {type: Number, default: 0, required: true},
     confirmations6: {type: Number, default: 0, required: true}
   },
+  isActive: {type: Boolean, required: true, default: true},
   lastBlockCheck: {type: Number, default: 0, required: true},
   lastTxs: {type: mongoose.Schema.Types.Mixed, default: [], required: true},
   created: {type: Date, required: true, default: Date.now}
