@@ -32,7 +32,7 @@ let config = {
     data: {
       uri: process.env.MONGO_DATA_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
       collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
-      useData: parseInt(process.env.USE_MONGO_DATA) || 0
+      useData: parseInt(process.env.USE_MONGO_DATA) || 1
     }
   },
   rabbit: {
