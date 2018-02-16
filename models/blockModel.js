@@ -18,7 +18,7 @@ const Block = new mongoose.Schema({
     minFee: {type: String},
     inputs: [{
       prevout:  {
-        hash: {type: String},
+        hash: {type: String, index: true},
         index: {type: Number}
       },
       value: {type: String},
