@@ -4,6 +4,7 @@ ENV NPM_CONFIG_LOGLEVEL warn
 ARG RELEASE=latest
 ARG GITHUB_API_KEY=123
 
+RUN export GITHUB_API_KEY=$GITHUB_API_KEY
 RUN apt update && \
     apt install -y python make g++ git build-essential && \
     npm install -g pm2@2.7.1 && \
