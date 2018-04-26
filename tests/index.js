@@ -126,4 +126,27 @@ describe('core/rest', function () {
     )
   });
 
+
+  it('validate utxo history ', async () => {
+    let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
+    const address = keyring.getAddress().toString()
+
+    let response = await request({
+      url: `http://${config.rest.domain}:${config.rest.port}/addr/${address}/utxo`,
+      method: 'get',
+      json: true
+    });
+
+    expect(response.body).to.not.empty;
+    const utxo = response.body[0];
+
+    expect(utxo.height).to.greaterThan(-1);
+    expect(utxo.address).to.equal(address);
+    expect(utxo.txid).an('string');
+    expect(utxo).to.contain.all.keys([
+      'address', 'txid', 'amount', 'satoshis', 'height', 'vout'
+    ]);
+
+    
+  });
 });
