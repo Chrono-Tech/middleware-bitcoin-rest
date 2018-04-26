@@ -15,6 +15,7 @@ const config = require('../config'),
 
 mongoose.Promise = Promise;
 mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri);
+mongoose.data = mongoose.createConnection(config.mongo.data.uri);
 
 const ctx = {
     network: null,
@@ -22,6 +23,7 @@ const ctx = {
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
+  txModel = require('../models/txModel'),
   ipcExec = require('./helpers/ipcExec'),
   request = Promise.promisify(require('request')),
   scope = {};
@@ -146,6 +148,9 @@ describe('core/rest', function () {
     expect(utxo).to.contain.all.keys([
       'address', 'txid', 'amount', 'satoshis', 'height', 'vout'
     ]);
+    // const tx = await txModel.findOne({hash: utxo.txid});
+    // console.log(obj.toObject(), obj.spent);
+    // expect(tx['outputs'][utxo.vout]['spent']).to.be.equal(false);
 
     
   });
