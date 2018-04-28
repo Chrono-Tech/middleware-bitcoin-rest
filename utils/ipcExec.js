@@ -5,6 +5,7 @@
  */
 
 const Promise = require('bluebird'),
+  uniqid = require('uniqid'),
   ipc = require('node-ipc');
 
 module.exports = async (config, method, params) => {
@@ -12,12 +13,12 @@ module.exports = async (config, method, params) => {
   const ipcInstance = new ipc.IPC;
 
   Object.assign(ipcInstance.config, {
-    id: Date.now(),
+    id: uniqid(),
     socketRoot: config.node.ipcPath,
     retry: 1500,
     sync: true,
     silent: true,
-    unlink: false,
+    unlink: true,
     maxRetries: 3
   });
 
@@ -30,7 +31,7 @@ module.exports = async (config, method, params) => {
 
   let response = await new Promise((res, rej) => {
     ipcInstance.of[config.node.ipcName].on('message', data => data.error ? rej(data.error) : res(data.result));
-    ipcInstance.of[config.node.ipcName].emit('message', JSON.stringify({method: method, params: params})
+    ipcInstance.of[config.node.ipcName].emit('message', JSON.stringify({method: method, params: params, id: uniqid()})
     );
   });
 
