@@ -14,22 +14,14 @@ const mongoose = require('mongoose'),
   config = require('../config');
 
 const TX = new mongoose.Schema({
-  blockNumber: {type: Number, index: true, required: true, default: -1},
-  hash: {type: String, index: true, unique: true},
-  inputs: [{
-    prevout: {
-      hash: {type: String, index: true},
-      index: {type: Number, index: true}
-    },
-    address: {type: String, index: true},
-    value: {type: Number},
-  }],
-  outputs: [{
-    value: {type: Number},
-    address: {type: String, index: true}
-  }],
-  timestamp: {type: Number, required: true, index: true, default: Date.now},
-  network: {type: String}
-});
+  _id: {type: String},
+  blockNumber: {type: Number, required: true, default: -1},
+  index: {type: Number},
+  fee: {type: Number},
+  timestamp: {type: Number, required: true, default: Date.now}
+}, { _id: false });
+
+TX.index({blockNumber: 1, index: 1});
+
 
 module.exports = mongoose.data.model(`${config.mongo.data.collectionPrefix}TX`, TX);
