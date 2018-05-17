@@ -90,7 +90,7 @@ describe('core/rest', function () {
   });
 
   it('register addresses', async () => {
-    await Promise.delay(10000);
+    await Promise.delay(30000);
     let responses = await Promise.all(ctx.accounts.map(account => {
       let keyring = new bcoin.keyring(account.privateKey, ctx.network);
       return request({
@@ -131,7 +131,7 @@ describe('core/rest', function () {
 
   it('validate utxo history ', async () => {
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
-    const address = keyring.getAddress().toString()
+    const address = keyring.getAddress().toString();
 
     let response = await request({
       url: `http://${config.rest.domain}:${config.rest.port}/addr/${address}/utxo`,
@@ -144,14 +144,8 @@ describe('core/rest', function () {
 
     expect(utxo.height).to.greaterThan(-1);
     expect(utxo.address).to.equal(address);
-    expect(utxo.txid).an('string');
-    expect(utxo).to.contain.all.keys([
-      'address', 'txid', 'amount', 'satoshis', 'height', 'vout'
-    ]);
-    // const tx = await txModel.findOne({hash: utxo.txid});
-    // console.log(obj.toObject(), obj.spent);
-    // expect(tx['outputs'][utxo.vout]['spent']).to.be.equal(false);
-
+    expect(utxo.txIndex).an('number');
+    expect(utxo).to.contain.all.keys(['amount', 'satoshis', 'height', 'vout']);
     
   });
 });
