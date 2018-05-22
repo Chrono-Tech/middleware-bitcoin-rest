@@ -1,3 +1,6 @@
+
+const config = require('../config');
+
 module.exports.id = '5.2c9dd332.05334c';
 
 /**
@@ -7,7 +10,7 @@ module.exports.id = '5.2c9dd332.05334c';
 
 
 module.exports.up = function (done) {
-  let coll = this.db.collection('noderedstorages');
+  let coll = this.db.collection(`${config.nodered.functionGlobalContext.settings.mongo.collectionPrefix}noderedstorages`);
   coll.update({'path': '2c9dd332.05334c', 'type': 'flows'}, {
     $set: {
       'path': '2c9dd332.05334c',
@@ -386,6 +389,6 @@ module.exports.up = function (done) {
 };
 
 module.exports.down = function (done) {
-  let coll = this.db.collection('noderedstorages');
+  let coll = this.db.collection(`${config.nodered.functionGlobalContext.settings.mongo.collectionPrefix}noderedstorages`);
   coll.remove({'path': '2c9dd332.05334c', 'type': 'flows'}, done);
 };
