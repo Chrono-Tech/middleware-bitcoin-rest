@@ -144,7 +144,6 @@ describe('core/rest', function () {
 
     expect(utxo.height).to.greaterThan(-1);
     expect(utxo.address).to.equal(address);
-    expect(utxo.txIndex).an('number');
     expect(utxo).to.contain.all.keys(['amount', 'satoshis', 'height', 'vout']);
     
   });
