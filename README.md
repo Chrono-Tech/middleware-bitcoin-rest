@@ -57,6 +57,7 @@ IPC_NAME=bitcoin
 IPC_PATH=/tmp/
 NODERED_MONGO_URI=mongodb://localhost:27018/data
 NODERED_AUTO_SYNC_MIGRATIONS=true
+HTTP_ADMIN=/admin
 ```
 
 The options are presented below:
@@ -74,6 +75,7 @@ The options are presented below:
 | IPC_PATH   | directory, where to store ipc file (you can skip this option on windows)
 | NODERED_MONGO_URI   | the URI string for mongo collection for keeping node-red users and flows (optional, if omitted - then default MONGO_URI will be used)
 | NODERED_AUTO_SYNC_MIGRATIONS   | autosync migrations on start (default = yes)
+| HTTP_ADMIN | admin path for nodered or false (if not publish as default)
 
 
 
