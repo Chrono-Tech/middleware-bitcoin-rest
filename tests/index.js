@@ -30,6 +30,9 @@ const ctx = {
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+
+let amqpInstance;
+
 describe('core/rest', function () {
 
   before(async () => {
@@ -46,6 +49,14 @@ describe('core/rest', function () {
 
   after(() => {
     return mongoose.disconnect();
+  });
+
+  beforeEach(async () => {
+    amqpInstance = await amqp.connect(config.rabbit.url);
+  });
+
+  afterEach(async () => {
+    await amqpInstance.close();
   });
 
   it('remove registered addresses from mongodb', async () => {
@@ -69,7 +80,6 @@ describe('core/rest', function () {
 
   it('unlock coins for account A by generating some coins for accountB', async () => {
     let keyring = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
-    let amqpInstance = await amqp.connect(config.rabbit.url);
     let channel = await amqpInstance.createChannel();
     try {
       await channel.assertExchange('events', 'topic', {durable: false});
@@ -89,23 +99,59 @@ describe('core/rest', function () {
     })
   });
 
-  it('register addresses', async () => {
-    await Promise.delay(30000);
-    let responses = await Promise.all(ctx.accounts.map(account => {
-      let keyring = new bcoin.keyring(account.privateKey, ctx.network);
-      return request({
-        url: `http://${config.rest.domain}:${config.rest.port}/addr`,
-        method: 'post',
-        json: {
-          address: keyring.getAddress().toString()
-        }
-      })
 
-    }));
 
-    responses.forEach(resp =>
-      expect(resp.body).to.include({code: 1})
-    )
+  it('address/create from post request', async () => {
+    const account = ctx.accounts[0];
+    let keyring = new bcoin.keyring(account.privateKey, ctx.network);
+    const address = keyring.getAddress().toString();
+    await new Promise.all([
+      (async() => {
+        await new Promise((res, rej) => {
+          request({
+            url: `http://${config.rest.domain}:${config.rest.port}/addr`,
+            method: 'post',
+            json: {
+              address
+            }
+          }, async (err, resp) => {
+            if (err || resp.statusCode !== 200) 
+              return rej(err || resp);
+            const newAccount = await accountModel.findOne({address});
+            expect(newAccount).not.to.be.null;
+            expect(newAccount.isActive).to.be.true;
+            res();
+          });
+        });
+      })(),
+      (async () => {
+        const channel = await amqpInstance.createChannel();
+        await channel.assertExchange('internal', 'topic', {durable: false});
+        const balanceQueue = await channel.assertQueue(`${config.rabbit.serviceName}_test.user`);
+        await channel.bindQueue(`${config.rabbit.serviceName}_test.user`, 'internal', 
+          `${config.rabbit.serviceName}_user.created`
+        );
+        return await new Promise(res => channel.consume(`${config.rabbit.serviceName}_test.user`, async (message) => {
+          const content = JSON.parse(message.content);
+          if (content.address == address)
+            res();
+        }, {noAck: true}));
+      })()
+    ]);
+
+  });
+
+  it('address/create from post request[1]', async () => {
+    const account = ctx.accounts[1];
+    let keyring = new bcoin.keyring(account.privateKey, ctx.network);
+    const address = keyring.getAddress().toString();
+    request({
+      url: `http://${config.rest.domain}:${config.rest.port}/addr`,
+      method: 'post',
+      json: {
+        address
+      }
+    });
   });
 
   it('validate potential balance changes for accounts', async () => {
