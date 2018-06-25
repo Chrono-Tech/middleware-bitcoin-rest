@@ -13,7 +13,7 @@ const _ = require('lodash'),
 module.exports.up = function (done) {
   let coll = this.db.collection(`${_.get(config, 'nodered.mongo.collectionPrefix', '')}noderedstorages`);
   coll.update({'path':'tabs','type':'flows'}, {
-    $set: {'path':'tabs','body':[{'id':'a93f8a7a.554448','type':'tab','label':'insights','disabled':false,'info':''},{'id':'e415e43d.f10178','type':'tab','label':'txs','disabled':false,'info':''},{'id':'2c9dd332.05334c','type':'tab','label':'address','disabled':false,'info':''}]}
+    $set: {'path':'tabs','body':[{'id':'e415e43d.f10178','type':'tab','label':'txs','disabled':false,'info':''},{'id':'2c9dd332.05334c','type':'tab','label':'address','disabled':false,'info':''}]}
   }, {upsert: true}, done);
 };
 
