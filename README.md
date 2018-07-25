@@ -74,7 +74,7 @@ The options are presented below:
 | NODERED_MONGO_URI   | the URI string for mongo collection for keeping node-red users and flows (optional, if omitted - then default MONGO_URI will be used)
 | NODERED_AUTO_SYNC_MIGRATIONS   | autosync migrations on start (default = yes)
 | HTTP_ADMIN | admin path for nodered or false (if not publish as default)
-| LABORX | url for laborxAuth [default=localhost:3001]
+| LABORX | url for laborxAuth [default=http://localhost:3001/api/v1/security]
 
 
 

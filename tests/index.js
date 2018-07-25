@@ -23,8 +23,10 @@ const ctx = {
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
+  profileModel = require('../models/profileModel'),
   txModel = require('../models/txModel'),
   ipcExec = require('./helpers/ipcExec'),
+  authRequest = require('./helpers/authRequest'),
   request = Promise.promisify(require('request')),
   scope = {};
 
@@ -36,6 +38,8 @@ let amqpInstance;
 describe('core/rest', function () {
 
   before(async () => {
+    await accountModel.remove();
+    await profileModel.remove();
 
     ctx.network = Network.get('regtest');
 
