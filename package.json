@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "middleware-common-components": "github:ChronoBank/middleware-common-components",
     "bluebird": "^3.5.0",
     "bunyan": "^1.8.12",
     "dotenv": "^4.0.0",
