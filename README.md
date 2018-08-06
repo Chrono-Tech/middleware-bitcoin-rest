@@ -66,6 +66,8 @@ The options are presented below:
 | ------ | ------ |
 | MONGO_URI   | the URI string for mongo connection
 | MONGO_COLLECTION_PREFIX   | the prefix name for all created collections, like for Account model - it will be called (in our case) bitcoinAccount
+| MONGO_PROFILE_URI   | the URI string for mongo connection, which holds profile accounts (if not specified, then default MONGO_URI connection will be used) [for token from laborx]
+| MONGO_PROFILE_COLLECTION_PREFIX   | the collection prefix for profile collection in mongo (If not specified, then the default MONGO_COLLECTION_PREFIX will be used) [for token from laborx]
 | REST_PORT   | rest plugin port
 | RABBIT_URI   | rabbitmq URI connection string
 | DB_PATH   | path where to store db (with memory db you can skip this option)
