@@ -7,8 +7,43 @@
 require('dotenv').config();
 const path = require('path'),
   _ = require('lodash'),
-  mongoose = require('mongoose'),
-  ipcExec = require('../utils/ipcExec');
+  providerService = require('../services/providerService'),
+  mongoose = require('mongoose');
+
+
+/** @function
+ * @description build default connection URI
+ * @returns {string}
+ */
+
+const getDefault = () => {
+  return (
+    (process.env.CONNECTION_URI || `${process.env.IPC_PATH || '/tmp/'}${process.env.IPC_NAME || 'bitcoin'}`) + '@' +
+    (process.env.ZMQ || 'tcp://127.0.0.1:43332')
+  );
+};
+
+/**
+ * @function
+ * @description return the array of providers
+ * @param providers - the string of providers
+ * @returns Array<{uri: String, zmq: String}>
+ */
+
+const createConfigProviders = (providers) => {
+  return _.chain(providers)
+    .split(',')
+    .map(provider => {
+      const data = provider.split('@');
+      return {
+        uri: data.length === 3 ? `${data[0].trim()}@${data[1]}` : data[0].trim(),
+        zmq: (data.length === 3 ? data[2] : data[1]).trim()
+      };
+    })
+    .value();
+};
+
+const providers = createConfigProviders(process.env.PROVIDERS || getDefault());
 
 /**
  * @factory config
@@ -29,7 +64,7 @@ const path = require('path'),
  *    }}
  */
 
-let config = {
+const config = {
   mongo: {
     accounts: {
       uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
@@ -48,10 +83,6 @@ let config = {
   rest: {
     domain: process.env.DOMAIN || 'localhost',
     port: parseInt(process.env.REST_PORT) || 8081
-  },
-  node: {
-    ipcName: process.env.IPC_NAME || 'bitcoin',
-    ipcPath: process.env.IPC_PATH || '/tmp/'
   },
   nodered: {
     mongo: {
@@ -75,12 +106,12 @@ let config = {
           url: process.env.RABBIT_URI || 'amqp://localhost:5672',
           serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
         }
+      },
+      node: {
+        provider: new providerService(providers)
       }
     }
   }
 };
 
-module.exports = (() => {
-  config.nodered.functionGlobalContext.rpc = (...args) => ipcExec.bind(this, config)(...args);
-  return config;
-})();
+module.exports = config;
