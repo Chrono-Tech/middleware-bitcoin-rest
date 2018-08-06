@@ -1,6 +1,6 @@
 # middleware-bitcoin-rest [![Build Status](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest.svg?branch=master)](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest)
 
-Middleware service for which expose rest api
+Middleware service which expose rest api
 
 ### Installation
 
@@ -41,7 +41,7 @@ The available routes are listed below:
 | /addr/{address}/utxo   | GET | |returns an array of unspent transactions (utxo)
 | /tx/send   | POST |  ``` {tx: <string>} ``` - raw encoded transaction | broadcast new transaction to network
 | /tx/{address}/history   | GET |  | retrieve transactions for the registered adresses [use skip and limit paramters].
-
+| /tx/{hash}   | GET |  | retrieve transaction by its hash
 
 
 ##### сonfigure your .env
@@ -66,16 +66,17 @@ The options are presented below:
 | ------ | ------ |
 | MONGO_URI   | the URI string for mongo connection
 | MONGO_COLLECTION_PREFIX   | the prefix name for all created collections, like for Account model - it will be called (in our case) bitcoinAccount
+| MONGO_PROFILE_URI   | the URI string for mongo connection, which holds profile accounts (if not specified, then default MONGO_URI connection will be used) [for token from laborx]
+| MONGO_PROFILE_COLLECTION_PREFIX   | the collection prefix for profile collection in mongo (If not specified, then the default MONGO_COLLECTION_PREFIX will be used) [for token from laborx]
 | REST_PORT   | rest plugin port
 | RABBIT_URI   | rabbitmq URI connection string
-| NETWORK   | network name (alias)- is used for connecting via ipc (regtest, main, testnet, bcc)
-| DB_DRIVER   | bitcoin database driver (leveldb or memory)
 | DB_PATH   | path where to store db (with memory db you can skip this option)
 | IPC_NAME   | ipc file name
 | IPC_PATH   | directory, where to store ipc file (you can skip this option on windows)
 | NODERED_MONGO_URI   | the URI string for mongo collection for keeping node-red users and flows (optional, if omitted - then default MONGO_URI will be used)
 | NODERED_AUTO_SYNC_MIGRATIONS   | autosync migrations on start (default = yes)
 | HTTP_ADMIN | admin path for nodered or false (if not publish as default)
+| LABORX | url for laborxAuth [default=http://localhost:3001/api/v1/security]
 
 
 

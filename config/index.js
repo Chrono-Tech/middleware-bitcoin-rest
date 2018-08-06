@@ -28,12 +28,17 @@ const path = require('path'),
  *      }
  *    }}
  */
+const accountPrefix = process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin';
 
 let config = {
   mongo: {
     accounts: {
       uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-      collectionPrefix: process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+      collectionPrefix: accountPrefix
+    },
+    profile: {
+      uri: process.env.MONGO_PROFILE_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+      collectionPrefix: process.env.MONGO_PROFILE_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
     },
     data: {
       uri: process.env.MONGO_DATA_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
@@ -74,6 +79,11 @@ let config = {
         rabbit: {
           url: process.env.RABBIT_URI || 'amqp://localhost:5672',
           serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
+        },
+        laborx: {
+          authProvider: process.env.LABORX || 'http://localhost:3001/api/v1/security',
+          profileModel: accountPrefix + 'Profile',
+          dbAlias: 'accounts'
         }
       }
     }

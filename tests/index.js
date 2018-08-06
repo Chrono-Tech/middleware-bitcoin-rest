@@ -23,8 +23,10 @@ const ctx = {
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
+  profileModel = require('../models/profileModel'),
   txModel = require('../models/txModel'),
   ipcExec = require('./helpers/ipcExec'),
+  authRequest = require('./helpers/authRequest'),
   request = Promise.promisify(require('request')),
   scope = {};
 
@@ -36,6 +38,8 @@ let amqpInstance;
 describe('core/rest', function () {
 
   before(async () => {
+    await accountModel.remove();
+    await profileModel.remove();
 
     ctx.network = Network.get('regtest');
 
@@ -100,7 +104,6 @@ describe('core/rest', function () {
   });
 
 
-
   it('address/create from post request', async () => {
     const account = ctx.accounts[0];
     let keyring = new bcoin.keyring(account.privateKey, ctx.network);
@@ -162,7 +165,7 @@ describe('core/rest', function () {
       keyring.getAddress().toString(),
       keyring2.getAddress().toString()
     ].map(address => {
-      return request({
+      return authRequest({
         url: `http://${config.rest.domain}:${config.rest.port}/addr/${address}/balance`,
         method: 'get',
         json: true
@@ -179,7 +182,7 @@ describe('core/rest', function () {
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     const address = keyring.getAddress().toString();
 
-    let response = await request({
+    let response = await authRequest({
       url: `http://${config.rest.domain}:${config.rest.port}/addr/${address}/utxo`,
       method: 'get',
       json: true
