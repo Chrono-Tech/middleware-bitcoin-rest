@@ -19,19 +19,15 @@ mongoose.data = mongoose.createConnection(config.mongo.data.uri);
 
 const ctx = {
     network: null,
-    accounts: []
+    accounts: [],
+    amqp: {}
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
-  txModel = require('../models/txModel'),
-  ipcExec = require('./helpers/ipcExec'),
+  ProviderService = require('../services/providerService'),
   request = Promise.promisify(require('request')),
   scope = {};
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-
-
-let amqpInstance;
 
 describe('core/rest', function () {
 
@@ -44,20 +40,21 @@ describe('core/rest', function () {
 
     ctx.accounts.push(keyPair, keyPair2);
 
+
+    ctx.amqp.instance = await amqp.connect(config.rabbit.url);
+    ctx.amqp.channel = await ctx.amqp.instance.createChannel();
+
+    ctx.provider = config.nodered.functionGlobalContext.node.provider;
+    await ctx.provider.setRabbitmqChannel(ctx.amqp.channel, config.rabbit.serviceName);
+
     mongoose.connect(config.mongo.accounts.uri, {useMongoClient: true});
   });
 
-  after(() => {
+  after(async () => {
+    await ctx.amqp.instance.close();
     return mongoose.disconnect();
   });
 
-  beforeEach(async () => {
-    amqpInstance = await amqp.connect(config.rabbit.url);
-  });
-
-  afterEach(async () => {
-    await amqpInstance.close();
-  });
 
   it('remove registered addresses from mongodb', async () => {
 
@@ -73,40 +70,39 @@ describe('core/rest', function () {
   });
 
   it('generate some coins for accountA', async () => {
-    scope.height = await ipcExec('getblockcount', []);
+    const instance = (await ctx.provider.get()).instance;
+
+    scope.height = await instance.execute('getblockcount', []);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
-    return await ipcExec('generatetoaddress', [50, keyring.getAddress().toString()])
+    return await instance.execute('generatetoaddress', [50, keyring.getAddress().toString()])
   });
 
   it('unlock coins for account A by generating some coins for accountB', async () => {
+    const instance = (await ctx.provider.get()).instance;
+
     let keyring = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
-    let channel = await amqpInstance.createChannel();
-    try {
-      await channel.assertExchange('events', 'topic', {durable: false});
-      await channel.assertQueue(`app_${config.rabbit.serviceName}_test.block`);
-      await channel.bindQueue(`app_${config.rabbit.serviceName}_test.block`, 'events', `${config.rabbit.serviceName}_block`);
-    } catch (e) {
-      channel = await amqpInstance.createChannel();
-    }
+
+    await ctx.amqp.channel.assertExchange('events', 'topic', {durable: false});
+    await ctx.amqp.channel.assertQueue(`app_${config.rabbit.serviceName}_test.block`);
+    await ctx.amqp.channel.bindQueue(`app_${config.rabbit.serviceName}_test.block`, 'events', `${config.rabbit.serviceName}_block`);
+
 
     return await new Promise(res => {
-      channel.consume(`app_${config.rabbit.serviceName}_test.block`, data => {
+      ctx.amqp.channel.consume(`app_${config.rabbit.serviceName}_test.block`, data => {
         let payload = JSON.parse(data.content.toString());
         if (payload.block >= scope.height + 150)
           res();
       }, {noAck: true});
-      ipcExec('generatetoaddress', [100, keyring.getAddress().toString()]);
+      instance.execute('generatetoaddress', [100, keyring.getAddress().toString()]);
     })
   });
-
-
 
   it('address/create from post request', async () => {
     const account = ctx.accounts[0];
     let keyring = new bcoin.keyring(account.privateKey, ctx.network);
     const address = keyring.getAddress().toString();
     await new Promise.all([
-      (async() => {
+      (async () => {
         await new Promise((res, rej) => {
           request({
             url: `http://${config.rest.domain}:${config.rest.port}/addr`,
@@ -115,7 +111,7 @@ describe('core/rest', function () {
               address
             }
           }, async (err, resp) => {
-            if (err || resp.statusCode !== 200) 
+            if (err || resp.statusCode !== 200)
               return rej(err || resp);
             const newAccount = await accountModel.findOne({address});
             expect(newAccount).not.to.be.null;
@@ -125,15 +121,14 @@ describe('core/rest', function () {
         });
       })(),
       (async () => {
-        const channel = await amqpInstance.createChannel();
-        await channel.assertExchange('internal', 'topic', {durable: false});
-        const balanceQueue = await channel.assertQueue(`${config.rabbit.serviceName}_test.user`);
-        await channel.bindQueue(`${config.rabbit.serviceName}_test.user`, 'internal', 
+        await ctx.amqp.channel.assertExchange('internal', 'topic', {durable: false});
+        await ctx.amqp.channel.assertQueue(`${config.rabbit.serviceName}_test.user`);
+        await ctx.amqp.channel.bindQueue(`${config.rabbit.serviceName}_test.user`, 'internal',
           `${config.rabbit.serviceName}_user.created`
         );
-        return await new Promise(res => channel.consume(`${config.rabbit.serviceName}_test.user`, async (message) => {
+        return await new Promise(res => ctx.amqp.channel.consume(`${config.rabbit.serviceName}_test.user`, async (message) => {
           const content = JSON.parse(message.content);
-          if (content.address == address)
+          if (content.address === address)
             res();
         }, {noAck: true}));
       })()
@@ -155,6 +150,7 @@ describe('core/rest', function () {
   });
 
   it('validate potential balance changes for accounts', async () => {
+    await Promise.delay(5000);
     let keyring = new bcoin.keyring(ctx.accounts[0].privateKey, ctx.network);
     let keyring2 = new bcoin.keyring(ctx.accounts[1].privateKey, ctx.network);
 
@@ -191,6 +187,6 @@ describe('core/rest', function () {
     expect(utxo.height).to.greaterThan(-1);
     expect(utxo.address).to.equal(address);
     expect(utxo).to.contain.all.keys(['amount', 'satoshis', 'height', 'vout']);
-    
+
   });
 });
