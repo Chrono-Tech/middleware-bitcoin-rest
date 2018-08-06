@@ -7,7 +7,6 @@
 const EventEmitter = require('events'),
   httpExec = require('../utils/api/httpExec'),
   ipcExec = require('../utils/api/ipcExec'),
-  providerServiceInterface = require('middleware-common-components/interfaces/blockProcessor/providerServiceInterface'),
   AbstractProvider = require('middleware-common-components/abstract/universal/AbstractProvider');
 
 /**
