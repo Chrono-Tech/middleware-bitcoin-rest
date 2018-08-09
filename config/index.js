@@ -88,6 +88,11 @@ const config = {
     mongo: {
       uri: process.env.NODERED_MONGO_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data'
     },
+    logging: {
+      console: {
+        level: process.env.LOG_LEVEL || 'info'
+      }
+    },
     autoSyncMigrations: _.isString(process.env.NODERED_AUTO_SYNC_MIGRATIONS) ? parseInt(process.env.NODERED_AUTO_SYNC_MIGRATIONS) : true,
     migrationsInOneFile: true,
     httpAdminRoot: process.env.HTTP_ADMIN || false,
