@@ -31,10 +31,10 @@ const init = async () => {
 
   _.chain([mongoose.accounts, mongoose.data])
     .compact().forEach(connection =>
-    connection.on('disconnected', () => {
-      throw new Error('mongo disconnected!');
-    })
-  ).value();
+      connection.on('disconnected', () => {
+        throw new Error('mongo disconnected!');
+      })
+    ).value();
 
   let conn = await amqp.connect(config.rabbit.url);
   let channel = await conn.createChannel();
