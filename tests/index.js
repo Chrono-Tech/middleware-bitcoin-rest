@@ -24,7 +24,6 @@ const ctx = {
   },
   expect = require('chai').expect,
   accountModel = require('../models/accountModel'),
-  ProviderService = require('../services/providerService'),
   request = Promise.promisify(require('request')),
   scope = {};
 
