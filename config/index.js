@@ -7,6 +7,7 @@
 require('dotenv').config();
 const path = require('path'),
   _ = require('lodash'),
+  networks = require('middleware-common-components/factories/btcNetworks'),
   providerService = require('../services/providerService'),
   mongoose = require('mongoose');
 
@@ -113,7 +114,8 @@ const config = {
         }
       },
       node: {
-        provider: new providerService(providers)
+        provider: new providerService(providers),
+        network: networks[process.env.NETWORK || 'regtest']
       }
     }
   }
