@@ -1,5 +1,5 @@
 # middleware-bitcoin-rest [![Build Status](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest.svg?branch=master)](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest)
-
+ 
 Middleware service which expose rest api
 
 ### Installation
