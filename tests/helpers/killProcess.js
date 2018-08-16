@@ -6,8 +6,6 @@
 module.exports = async (processPid) => {
   if (processPid.killed)
     return true;
-  await new Promise(res => {
-    processPid.on('exit', res);
-    processPid.kill();
-  });
+  processPid.kill();
+  await Promise.delay(5000);
 }
