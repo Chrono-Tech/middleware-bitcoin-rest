@@ -66,7 +66,7 @@ module.exports = (ctx) => {
       timestamp: 6,
       'outputs':[{address}],
       inputs: [],
-      confirmations: -7,
+      confirmations: -1,
       'blockNumber': 7,
       'hash': hash
     });
