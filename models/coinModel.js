@@ -30,4 +30,4 @@ Coin.index({inputBlock: 1, inputTxIndex: 1, inputIndex: 1});
 Coin.index({address: 1});
 
 
-module.exports = mongoose.data.model(`${config.mongo.data.collectionPrefix}Coin`, Coin);
+module.exports = () => mongoose.data.model(`${config.mongo.data.collectionPrefix}Coin`, Coin);

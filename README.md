@@ -1,5 +1,5 @@
 # middleware-bitcoin-rest [![Build Status](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest.svg?branch=master)](https://travis-ci.org/ChronoBank/middleware-bitcoin-rest)
-
+ 
 Middleware service which expose rest api
 
 ### Installation
@@ -65,7 +65,15 @@ The options are presented below:
 | name | description|
 | ------ | ------ |
 | MONGO_URI   | the URI string for mongo connection
-| MONGO_COLLECTION_PREFIX   | the prefix name for all created collections, like for Account model - it will be called (in our case) bitcoinAccount
+| MONGO_COLLECTION_PREFIX   | the default prefix for all mongo collections. The default value is 'eth'
+| MONGO_ACCOUNTS_URI   | the URI string for mongo connection, which holds users accounts (if not specified, then default MONGO_URI connection will be used)
+| MONGO_ACCOUNTS_COLLECTION_PREFIX   | the collection prefix for accounts collection in mongo (If not specified, then the default MONGO_COLLECTION_PREFIX will be used)
+| MONGO_PROFILE_URI   | the URI string for mongo connection, which holds profile accounts (if not specified, then default MONGO_URI connection will be used) [for token from laborx]
+| MONGO_PROFILE_COLLECTION_PREFIX   | the collection prefix for profile collection in mongo (If not specified, then the default MONGO_COLLECTION_PREFIX will be used) [for token from laborx]
+| MONGO_DATA_URI   | the URI string for mongo connection, which holds data collections (for instance, processed block's height). In case, it's not specified, then default MONGO_URI connection will be used)
+| MONGO_DATA_COLLECTION_PREFIX   | the collection prefix for data collections in mongo (If not specified, then the default MONGO_COLLECTION_PREFIX will be used)
+| NODERED_MONGO_URI   | the URI string for mongo connection, which holds data collections (for instance, processed block's height). In case, it's not specified, then default MONGO_URI connection will be used)
+| NODE_RED_MONGO_COLLECTION_PREFIX   | the collection prefix for node-red collections in mongo (If not specified, then the collections will be created without prefix)
 | REST_PORT   | rest plugin port
 | RABBIT_URI   | rabbitmq URI connection string
 | DB_PATH   | path where to store db (with memory db you can skip this option)
@@ -74,6 +82,9 @@ The options are presented below:
 | NODERED_MONGO_URI   | the URI string for mongo collection for keeping node-red users and flows (optional, if omitted - then default MONGO_URI will be used)
 | NODERED_AUTO_SYNC_MIGRATIONS   | autosync migrations on start (default = yes)
 | HTTP_ADMIN | admin path for nodered or false (if not publish as default)
+| LABORX | url for laborxAuth [default=http://localhost:3001/api/v1/security]
+| LABORX_RABBIT_SERVICE_NAME | service name for laborx[exchange=events] in rabbitMq 
+| LABORX_RABBIT_URI | rabbit uri for laborx [exchange=events]
 
 
 

@@ -10,8 +10,8 @@ const config = require('./config'),
   log = bunyan.createLogger({name: 'core.rest'}),
   path = require('path'),
   _ = require('lodash'),
-  amqp = require('amqplib'),
   migrator = require('middleware_service.sdk').migrator,
+  models = require('./models'),
   redInitter = require('middleware_service.sdk').init;
 
 /**
@@ -22,36 +22,28 @@ const config = require('./config'),
 
 
 mongoose.Promise = Promise;
-mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri);
+mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri, {useMongoClient: true});
+mongoose.profile = mongoose.createConnection(config.mongo.profile.uri, {useMongoClient: true});
+mongoose.data = mongoose.createConnection(config.mongo.data.uri, {useMongoClient: true});
 
-if (config.mongo.data.useData)
-  mongoose.data = mongoose.createConnection(config.mongo.data.uri);
+_.chain([mongoose.accounts, mongoose.data, mongoose.profile])
+  .compact().forEach(connection =>
+    connection.on('disconnected', function () {
+      log.error('mongo disconnected!');
+      process.exit(0);
+    })
+  ).value();
+
+models.init();
 
 const init = async () => {
 
-  _.chain([mongoose.accounts, mongoose.data])
-    .compact().forEach(connection =>
-      connection.on('disconnected', () => {
-        throw new Error('mongo disconnected!');
-      })
-    ).value();
-
-  let conn = await amqp.connect(config.rabbit.url);
-  let channel = await conn.createChannel();
-
-  channel.on('close', () => {
-    throw new Error('rabbitmq process has finished!');
-  });
-
-  await config.nodered.functionGlobalContext.node.provider.setRabbitmqChannel(channel, config.rabbit.serviceName);
-
-  require('require-all')({
-    dirname: path.join(__dirname, '/models'),
-    filter: /(.+Model)\.js$/
-  });
-
   if (config.nodered.autoSyncMigrations)
-    await migrator.run(config, path.join(__dirname, 'migrations'));
+    await migrator.run(
+      config,
+      path.join(__dirname, 'migrations')
+    );
+
 
   redInitter(config);
 
