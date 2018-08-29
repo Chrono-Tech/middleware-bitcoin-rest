@@ -9,4 +9,4 @@ module.exports = async (processPid) => {
     return true;
   processPid.kill();
   await Promise.delay(5000);
-}
+};

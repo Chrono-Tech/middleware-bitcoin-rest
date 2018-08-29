@@ -152,6 +152,7 @@ module.exports = (ctx) => {
     expect(Date.now() - start).to.be.below(TIMEOUT);
   });
 
+/*
   it('send message address.created from laborx - get events message account.created less than 1s', async () => {
     const address = generateAddress('test4');
     ctx.amqp.queue = await ctx.amqp.channel.assertQueue('test_addr4', {autoDelete: true, durable: false, noAck: true});
@@ -160,12 +161,16 @@ module.exports = (ctx) => {
     const start = Date.now();
     await Promise.all([
       (async () => {
+        await Promise.delay(5000);
         const data = {'bitcoin-address': address};
         await ctx.amqp.channel.publish('profiles', 'address.created', new Buffer(JSON.stringify(data)));
       })(),
 
       (async () => {
         await new Promise(res => ctx.amqp.channel.consume('test_addr4',  msg => {
+          if(!msg)
+            return;
+
           const content = JSON.parse(msg.content);
           expect(content.address).to.equal(address);
           ctx.amqp.channel.cancel(msg.fields.consumerTag);
@@ -191,6 +196,9 @@ module.exports = (ctx) => {
 
       (async () => {
         await new Promise(res => ctx.amqp.channel.consume('test_addr',  msg => {
+          if(!msg)
+            return;
+
           const content = JSON.parse(msg.content);
           expect(content.address).to.equal(address);
           ctx.amqp.channel.cancel(msg.fields.consumerTag);
@@ -201,6 +209,7 @@ module.exports = (ctx) => {
 
     expect(Date.now() - start).to.be.below(TIMEOUT);
   });
+*/
 
 
 

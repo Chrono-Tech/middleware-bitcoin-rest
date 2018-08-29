@@ -48,7 +48,7 @@ describe('core/bitcoinRest', function () {
   });
 
 
-  //describe('features', () => featuresTests(ctx));
+  describe('features', () => featuresTests(ctx));
   describe('fuzz', () => fuzzTests(ctx));
   describe('performance', () => performanceTests(ctx));
 
