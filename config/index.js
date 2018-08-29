@@ -9,7 +9,14 @@ const path = require('path'),
   _ = require('lodash'),
   networks = require('middleware-common-components/factories/btcNetworks'),
   providerService = require('../services/providerService'),
-  mongoose = require('mongoose');
+  mongoose = require('mongoose'),
+  accountPrefix = process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
+  profilePrefix = process.env.MONGO_PROFILE_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
+  collectionPrefix = process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
+  rabbit = {
+    url: process.env.RABBIT_URI || 'amqp://localhost:5672',
+    serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
+  };
 
 
 /** @function
@@ -69,25 +76,27 @@ const config = {
   mongo: {
     accounts: {
       uri: process.env.MONGO_ACCOUNTS_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-      collectionPrefix: process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+      collectionPrefix: accountPrefix
+    },
+    profile: {
+      uri: process.env.MONGO_PROFILE_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+      collectionPrefix: profilePrefix
     },
     data: {
       uri: process.env.MONGO_DATA_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
-      collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
+      collectionPrefix,
       useData: parseInt(process.env.USE_MONGO_DATA) || 1
     }
   },
-  rabbit: {
-    url: process.env.RABBIT_URI || 'amqp://localhost:5672',
-    serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
-  },
+  rabbit,
   rest: {
     domain: process.env.DOMAIN || 'localhost',
     port: parseInt(process.env.REST_PORT) || 8081
   },
   nodered: {
     mongo: {
-      uri: process.env.NODERED_MONGO_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data'
+      uri: process.env.NODERED_MONGO_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/data',
+      collectionPrefix: process.env.NODE_RED_MONGO_COLLECTION_PREFIX || '',
     },
     logging: {
       console: {
@@ -105,12 +114,17 @@ const config = {
       },
       settings: {
         mongo: {
-          accountPrefix: process.env.MONGO_ACCOUNTS_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin',
-          collectionPrefix: process.env.MONGO_DATA_COLLECTION_PREFIX || process.env.MONGO_COLLECTION_PREFIX || 'bitcoin'
+          accountPrefix,
+          collectionPrefix
         },
-        rabbit: {
-          url: process.env.RABBIT_URI || 'amqp://localhost:5672',
-          serviceName: process.env.RABBIT_SERVICE_NAME || 'app_bitcoin'
+        rabbit,
+        laborx: {
+          useAuth: process.env.LABORX_USE_AUTH ? parseInt(process.env.LABORX_USE_AUTH) : false,
+          url: process.env.LABORX_RABBIT_URI || 'amqp://localhost:5672',
+          serviceName: process.env.LABORX_RABBIT_SERVICE_NAME || '',
+          authProvider: process.env.LABORX || 'http://localhost:3001/api/v1/security',
+          profileModel: profilePrefix + 'Profile',
+          dbAlias: 'profile'
         }
       },
       node: {
