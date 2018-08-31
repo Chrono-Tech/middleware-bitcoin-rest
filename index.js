@@ -45,6 +45,7 @@ const init = async () => {
     throw new Error('rabbitmq process has finished!');
   });
 
+  await channel.assertExchange('internal', 'topic', {durable: false});
   await config.nodered.functionGlobalContext.node.provider.setRabbitmqChannel(channel, config.rabbit.serviceName);
 
   if (config.nodered.autoSyncMigrations)
