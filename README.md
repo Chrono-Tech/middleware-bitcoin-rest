@@ -42,7 +42,7 @@ The available routes are listed below:
 | /tx/send   | POST |  ``` {tx: <string>} ``` - raw encoded transaction | broadcast new transaction to network
 | /tx/{address}/history   | GET |  | retrieve transactions for the registered adresses [use skip and limit paramters].
 | /tx/{hash}   | GET |  | retrieve transaction by its hash
-
+| /estimate/feerate   | GET |  | estimate fee rate (based on last 6 blocks)
 
 ##### сonfigure your .env
 
