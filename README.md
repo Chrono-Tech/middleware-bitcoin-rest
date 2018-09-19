@@ -85,7 +85,10 @@ The options are presented below:
 | LABORX | url for laborxAuth [default=http://localhost:3001/api/v1/security]
 | LABORX_RABBIT_SERVICE_NAME | service name for laborx[exchange=events] in rabbitMq 
 | LABORX_RABBIT_URI | rabbit uri for laborx [exchange=events]
-
+| INFRASTRUCTURE_RABBIT_URI   | rabbitmq URI connection string for infrastructure
+| INFRASTRUCTURE_RABBIT_SERVICE_NAME   | rabbitmq service name for infrastructure
+| INFRASTRUCTURE_RABBIT_EXCHANGE   | rabbitmq exchange name for infrastructure
+| CHECK_INFRASTRUCTURE | check infrastructure or not (default = true)
 
 
 License

@@ -11,6 +11,11 @@ const config = require('./config'),
   path = require('path'),
   _ = require('lodash'),
   amqp = require('amqplib'),
+  
+  AmqpService = require('middleware-common-infrastructure/AmqpService'),
+  InfrastructureInfo = require('middleware-common-infrastructure/InfrastructureInfo'),
+  InfrastructureService = require('middleware-common-infrastructure/InfrastructureService'),
+
   migrator = require('middleware_service.sdk').migrator,
   models = require('./models'),
   redInitter = require('middleware_service.sdk').init;
@@ -21,6 +26,23 @@ const config = require('./config'),
  * and addresses manipulation
  */
 
+const runInfrastucture = async function () {
+  const rabbit = new AmqpService(
+    config.infrastructureRabbit.url, 
+    config.infrastructureRabbit.exchange,
+    config.infrastructureRabbit.serviceName
+  );
+  const info = InfrastructureInfo(require('./package.json'));
+  const infrastructure = new InfrastructureService(info, rabbit, {checkInterval: 10000});
+  await infrastructure.start();
+  infrastructure.on(infrastructure.REQUIREMENT_ERROR, ({requirement, version}) => {
+    log.error(`Not found requirement with name ${requirement.name} version=${requirement.version}.` +
+        ` Last version of this middleware=${version}`);
+    process.exit(1);
+  });
+  await infrastructure.checkRequirements();
+  infrastructure.periodicallyCheck();
+};
 
 mongoose.Promise = Promise;
 mongoose.accounts = mongoose.createConnection(config.mongo.accounts.uri, {useMongoClient: true});
@@ -37,6 +59,9 @@ const init = async () => {
     ).value();
 
   models.init();
+
+  if (config.checkInfrastructure)
+    await runInfrastucture();
 
   let conn = await amqp.connect(config.rabbit.url);
   let channel = await conn.createChannel();

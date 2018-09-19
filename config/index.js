@@ -89,6 +89,12 @@ const config = {
     }
   },
   rabbit,
+  infrastructureRabbit: {
+    url: process.env.RABBIT_VERSION_URI || process.env.RABBIT_URI || 'amqp://localhost:5672',
+    exchange: process.env.RABBIT_VERSION_EXCHANGE || 'internal',
+    serviceName: process.env.RABBIT_VERSION_SERVICE_NAME || 'infrastucture' 
+  },
+  checkInfrastructure: process.env.CHECK_INFRASTUCTURE || true,
   rest: {
     domain: process.env.DOMAIN || 'localhost',
     port: parseInt(process.env.REST_PORT) || 8081
