@@ -2,9 +2,7 @@
   "name": "middleware_bitcoin.rest",
   "version": "1.0.0",
   "main": "index.js",
-  "requirements" : {
-
-  },
+  "requirements": {},
   "dependencies": {
     "middleware-common-components": "github:ChronoBank/middleware-common-components",
     "middleware_common_infrastructure": "^1.0.0",
