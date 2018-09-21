@@ -27,6 +27,7 @@ const config = require('./config'),
  */
 
 const runSystem = async function () {
+  await channel.assertExchange(config.systemRabbit.exchange, 'topic', {durable: false});
   const rabbit = new AmqpService(
     config.systemRabbit.url, 
     config.systemRabbit.exchange,
