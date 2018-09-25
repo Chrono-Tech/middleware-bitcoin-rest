@@ -18,7 +18,7 @@ module.exports = (ctx) => {
   });
 
    describe('tx', () => txTests(ctx));
-  //describe('address', () => addressTests(ctx));
+   describe('address', () => addressTests(ctx));
 
   after('kill environment', async () => {
     await ctx.amqp.channel.close();
