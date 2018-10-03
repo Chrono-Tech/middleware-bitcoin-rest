@@ -10,7 +10,7 @@ const models = require('../../models'),
   expect = require('chai').expect,
   url = config.dev.url;
 
-const generateAddress  = (name) => name.concat('a'.repeat(36-name.length))
+const generateAddress  = (name) => name.concat('a'.repeat(36-name.length));
 
 module.exports = () => {
 

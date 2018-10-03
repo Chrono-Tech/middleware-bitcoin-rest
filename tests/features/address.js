@@ -86,6 +86,7 @@ module.exports = (ctx) => {
     await Promise.all([
       (async () => {
         const data = {'bitcoin-address': address};
+        await Promise.delay(5000);
         await ctx.amqp.channel.publish('profiles', 'address.created', new Buffer(JSON.stringify(data)));
       })(),
 
@@ -97,7 +98,7 @@ module.exports = (ctx) => {
           res();
         }));
         const account = await models.accountModel.findOne({address});
-        expect(account.address).to.equal(address);;
+        expect(account.address).to.equal(address);
       })()
     ]);
   });
@@ -167,8 +168,6 @@ module.exports = (ctx) => {
       })()
     ]);
   });
-
-
 
   it('send event message account.create  - get events message account.created after account in mongo', async () => {
     const address = generateAddress('test6');
@@ -245,7 +244,6 @@ module.exports = (ctx) => {
     ]);
   });
 
-
   it('send message address.deleted from laborx about not exist addr - get account.deleted event', async () => {
     const address = generateAddress('test4');
     
@@ -271,7 +269,6 @@ module.exports = (ctx) => {
       })
     ]);
   });
-
 
   it('GET /addr/:addr/balance - and get response with balance', async () => {
     const address = generateAddress('test7');
