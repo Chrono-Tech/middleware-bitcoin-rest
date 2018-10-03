@@ -13,7 +13,7 @@ module.exports = (ctx) => {
     ctx.amqp.channel = await ctx.amqp.instance.createChannel();
     ctx.amqp.channel.prefetch(1);
 
-    ctx.restPid = spawn('node', ['index.js'], {env: process.env, stdio: 'inherit'});
+    ctx.restPid = spawn('node', ['index.js'], {env: process.env, stdio: 'ignore'});
     await Promise.delay(10000);
   });
 
